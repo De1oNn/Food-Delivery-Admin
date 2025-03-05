@@ -51,7 +51,7 @@ export default function Signup() {
 
           <div className="relative">
             <label className="block text-sm font-medium text-gray-300">
-              Password
+              Password!
             </label>
             <input
               type="password"
