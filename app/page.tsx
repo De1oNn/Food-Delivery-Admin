@@ -66,7 +66,7 @@ export default function Signup() {
             onClick={handleSignup}
             className="w-full p-3 rounded-xl text-white font-semibold bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg transform active:scale-95 transition-all duration-300 hover:shadow-blue-500/50 hover:from-blue-600 hover:to-purple-700"
           >
-            Sign Up
+            Sign Up!
           </button>
         </div>
 
