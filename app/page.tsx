@@ -1,80 +1,83 @@
+// "use client";
+
+// import { useRouter } from "next/navigation";
+
+// export default function Page() {
+//   const router = useRouter();
+
+//   return (
+//     <div className="h-screen w-screen flex justify-center items-center gap-4">
+//       <button 
+//         className="border-2 bg-white text-black rounded-md h-12 w-24"
+//         onClick={() => router.push("/sign-up")}>
+//         Sign-up
+//       </button>
+      
+//       <button 
+//         className="border-2 bg-white text-black rounded-md h-12 w-24"
+//         onClick={() => router.push("/log-in")}>
+//         Log-in
+//       </button>
+//     </div>
+//   );
+// }
 "use client";
 
 import { useState } from "react";
 
-export default function Signup() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+export default function Page() {
+  const [currentSection, setCurrentSection] = useState(0);
 
-  const handleSignup = async () => {
-    setMessage("");
-    setError("");
-
-    const response = await fetch("http://localhost:5000/auth/sign-up", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      setMessage(data.message);
-    } else {
-      setError(data.message || "Signup failed");
-    }
+  const handleNext = () => {
+    // Move to the next section, loop back to 0 if at the end
+    setCurrentSection((prev) => (prev === 2 ? 0 : prev + 1));
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="relative max-w-md w-full bg-white/10 backdrop-blur-lg p-8 rounded-3xl shadow-2xl border border-white/20">
-        <div className="absolute -top-2 left-2 w-full h-full bg-white/10 rounded-3xl shadow-lg blur-md"></div>
-
-        <h1 className="text-3xl font-bold text-white text-center mb-6 drop-shadow-md">
-          Create Account
-        </h1>
-        <div className="space-y-6">
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-300">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-2 block w-full p-3 rounded-xl bg-gray-800/50 text-white shadow-inner border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400 transition-all"
-              required
-            />
-          </div>
-
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-300">
-              Password!
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-2 block w-full p-3 rounded-xl bg-gray-800/50 text-white shadow-inner border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400 transition-all"
-              required
-            />
-          </div>
-
+    <div className="h-screen w-full flex flex-col justify-center items-center">
+      {/* Section 1 */}
+      {currentSection === 0 && (
+        <div className="bg-blue-200 p-8 rounded-lg text-center">
+          <h1 className="text-2xl font-bold">Section 1</h1>
+          <p>This is the first section.</p>
           <button
-            onClick={handleSignup}
-            className="w-full p-3 rounded-xl text-white font-semibold bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg transform active:scale-95 transition-all duration-300 hover:shadow-blue-500/50 hover:from-blue-600 hover:to-purple-700"
-          >
-            Sign Up
-          </button>
+        className="mt-4 bg-gray-800 text-white rounded px-4 py-2 hover:bg-gray-700"
+        onClick={handleNext}
+      >
+        Next
+      </button>
         </div>
+      )}
 
-        {message && (
-          <p className="mt-4 text-green-400 text-center">{message}</p>
-        )}
-        {error && <p className="mt-4 text-red-400 text-center">{error}</p>}
-      </div>
+      {/* Section 2 */}
+      {currentSection === 1 && (
+        <div className="bg-green-200 p-8 rounded-lg text-center">
+          <h1 className="text-2xl font-bold">Section 2</h1>
+          <p>This is the second section.</p>
+          <button
+        className="mt-4 bg-gray-800 text-white rounded px-4 py-2 hover:bg-gray-700"
+        onClick={handleNext}
+      >
+        Next
+      </button>
+        </div>
+      )}
+
+      {/* Section 3 */}
+      {currentSection === 2 && (
+        <div className="bg-yellow-200 p-8 rounded-lg text-center">
+          <h1 className="text-2xl font-bold">Section 3</h1>
+          <p>This is the third section.</p>
+          <button
+        className="mt-4 bg-gray-800 text-white rounded px-4 py-2 hover:bg-gray-700"
+        onClick={handleNext}
+      >
+        Next
+      </button>
+        </div>
+      )}
+
+      {/* Next Button */}
     </div>
   );
 }
