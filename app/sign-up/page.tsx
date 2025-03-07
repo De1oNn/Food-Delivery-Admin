@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Signup() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -69,6 +71,12 @@ export default function Signup() {
             Sign Up
           </button>
         </div>
+        <button
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md h-12 w-24 font-semibold hover:from-purple-600 hover:to-pink-600 hover:scale-105 transition-all duration-300 shadow-md"
+            onClick={() => router.push("/log-in")}
+          >
+            Log-in
+        </button>
 
         {message && (
           <p className="mt-4 text-green-400 text-center">{message}</p>
