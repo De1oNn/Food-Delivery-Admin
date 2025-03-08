@@ -12,8 +12,7 @@ export default function Login() {
     // Reset messages
     setMessage("");
     setError("");
-
-    // Basic validation
+    
     if (!email || !password) {
       setError("Please enter both email and password");
       return;
