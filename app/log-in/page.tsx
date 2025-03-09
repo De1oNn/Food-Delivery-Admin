@@ -13,6 +13,7 @@ export default function Login() {
     setMessage("");
     setError("");
     
+    
     if (!email || !password) {
       setError("Please enter both email and password");
       return;
