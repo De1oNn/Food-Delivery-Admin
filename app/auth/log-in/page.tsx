@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    // Reset messages
     setMessage("");
     setError("");
     
@@ -29,11 +30,14 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(data.message || "Login successful!");
-        // Optional: Handle token or redirect if your backend returns one
-        if (data.token) {
-          localStorage.setItem("token", data.token); // Example: Store token
-          // You could redirect here, e.g., window.location.href = "/dashboard";
+        setMessage(data.message);
+        const userId = data.user?.id; // Safely access 'id'
+        if (userId) {
+          setTimeout(() => {
+            router.push(`/hello?userId=${userId}`); // Delay redirect to show message
+          }, 1000); // 1-second delay
+        } else {
+          setError("User ID not returned from server");
         }
       } else {
         setError(data.message || "Login failed");

@@ -22,11 +22,19 @@ export default function Signup() {
 
     const data = await response.json();
 
-    if (response.ok) {
-      setMessage(data.message);
-    } else {
-      setError(data.message || "Signup failed");
-    }
+     if (response.ok) {
+       setMessage(data.message);
+       const userId = data.user?.id; // Safely access 'id'
+       if (userId) {
+         setTimeout(() => {
+           router.push(`/hello?userId=${userId}`); // Delay redirect to show message
+         }, 1000);
+       } else {
+         setError("User ID not returned from server");
+       }
+     } else {
+       setError(data.message || "Signup failed");
+     }
   };
 
   return (
