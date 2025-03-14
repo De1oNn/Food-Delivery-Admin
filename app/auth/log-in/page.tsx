@@ -44,11 +44,11 @@ export default function Login() {
     }
   };
 
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <div className="relative max-w-md w-full bg-white/10 backdrop-blur-lg p-8 rounded-3xl shadow-2xl border border-white/20">
         <div className="absolute -top-2 left-2 w-full h-full bg-white/10 rounded-3xl shadow-lg blur-md"></div>
-
         <h1 className="text-3xl font-bold text-white text-center mb-6 drop-shadow-md">
           Log In
         </h1>
@@ -86,6 +86,7 @@ export default function Login() {
             Log In
           </button>
         </div>
+        
 
         {message && (
           <p className="mt-4 text-green-400 text-center">{message}</p>
