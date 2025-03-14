@@ -13,8 +13,7 @@ export default function Login() {
   const handleLogin = async () => {
     setMessage("");
     setError("");
-    
-    
+
     if (!email || !password) {
       setError("Please enter both email and password");
       return;
@@ -30,15 +29,13 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(data.message);
-        const userId = data.user?.id; // Safely access 'id'
-        if (userId) {
-          setTimeout(() => {
-            router.push(`/hello?userId=${userId}`); // Delay redirect to show message
-          }, 1000); // 1-second delay
-        } else {
-          setError("User ID not returned from server");
-        }
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        setMessage("Login successful!");
+        setTimeout(() => {
+          router.push(`/dashboard?userId=${data.user._id}`);
+        }, 1000);
       } else {
         setError(data.message || "Login failed");
       }
