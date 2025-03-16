@@ -3,56 +3,71 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-// Define the shape of a food item
 interface FoodItem {
   _id: string;
   foodName: string;
   price: number;
   image: string;
-  ingredients: string[] | string; // Allow string as fallback
-  category: string | { _id: string; name: string }; // Handle populated category
+  ingredients: string;
+  category: { _id: string; categoryName: string } | null; // Allow null
+}
+
+interface CategoryItem {
+  _id: string;
+  categoryName: string;
 }
 
 export default function Foods() {
   const router = useRouter();
   const [foods, setFoods] = useState<FoodItem[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Fetch foods on mount
   useEffect(() => {
-    const fetchFoods = async () => {
+    const fetchData = async () => {
       try {
         setError("");
-        const response = await fetch("http://localhost:5000/food", {
+
+        // Fetch foods
+        const foodResponse = await fetch("http://localhost:5000/food", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
         });
+        const foodData = await foodResponse.json();
+        console.log("Food response data:", foodData);
 
-        console.log("Response status:", response.status);
-        const data = await response.json();
-        console.log("Response data:", data);
-
-        if (response.ok) {
-          if (Array.isArray(data)) {
-            // Normalize ingredients to always be an array
-            const normalizedFoods = data.map((food) => ({
-              ...food,
-              ingredients: Array.isArray(food.ingredients)
-                ? food.ingredients
-                : typeof food.ingredients === "string"
-                ? food.ingredients.split(",").map((item: string) => item.trim())
-                : [],
-            }));
-            setFoods(normalizedFoods);
-          } else {
-            setError("Unexpected response format: Data is not an array");
-          }
-        } else {
-          setError(data.message || "Failed to fetch foods");
+        if (!foodResponse.ok) {
+          throw new Error(foodData.message || "Failed to fetch foods");
         }
+
+        // Fetch categories
+        const categoryResponse = await fetch("http://localhost:5000/food-category", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const categoryData = await categoryResponse.json();
+        console.log("Category response data:", categoryData);
+
+        if (!categoryResponse.ok) {
+          throw new Error(categoryData.message || "Failed to fetch categories");
+        }
+
+        // Filter out foods with null categories and log them
+        const validFoods = (foodData.foods || []).filter((food: FoodItem, index: number) => {
+          if (!food.category) {
+            console.warn(`Food ${index} (${food.foodName}) has null category`);
+            return false;
+          }
+          return true;
+        });
+
+        setFoods(validFoods);
+        setCategories(categoryData.categories || []);
       } catch (err) {
         console.error("Fetch error:", err);
         setError(
@@ -63,11 +78,25 @@ export default function Foods() {
       }
     };
 
-    fetchFoods();
+    fetchData();
   }, []);
 
+  // Group foods by category, including an "Uncategorized" group for edge cases
+  const groupedFoods = categories.reduce((acc, category) => {
+    acc[category._id] = foods.filter(food => food.category?._id === category._id);
+    return acc;
+  }, {} as Record<string, FoodItem[]>);
+
+  // Handle foods with null categories separately (optional)
+  const uncategorizedFoods = foods.filter(food => !food.category);
+
   const back = () => {
-    router.push("/dashboard");
+    router.push("/food");
+  };
+
+  const handleImageError = (foodId: string) => (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error(`Image failed to load for food ID ${foodId}: ${e.currentTarget.src}`);
+    e.currentTarget.style.display = "none"; // Hide broken image
   };
 
   return (
@@ -87,38 +116,76 @@ export default function Foods() {
           <p className="text-white text-center">Loading foods...</p>
         ) : error ? (
           <p className="mt-4 text-red-400 text-center">{error}</p>
-        ) : foods.length === 0 ? (
-          <p className="text-white text-center">No foods found.</p>
+        ) : categories.length === 0 && foods.length === 0 ? (
+          <p className="text-white text-center">No foods or categories found.</p>
         ) : (
-          <div className="space-y-4">
-            {foods.map((food) => (
-              <div
-                key={food._id}
-                className="p-4 bg-gray-800 rounded-xl text-white shadow-md"
-              >
-                <h2 className="text-lg font-semibold">{food.foodName}</h2>
-                <p>Price: ${food.price.toFixed(2)}</p>
-                {food.image && (
-                  <img
-                    src={food.image}
-                    alt={food.foodName}
-                    className="mt-2 w-full h-32 object-cover rounded-lg"
-                  />
+          <div className="space-y-8">
+            {categories.map(category => (
+              <div key={category._id}>
+                <h2 className="text-2xl font-bold text-white mb-4">
+                  {category.categoryName} Foods
+                </h2>
+                {groupedFoods[category._id]?.length > 0 ? (
+                  <div className="space-y-4">
+                    {groupedFoods[category._id].map(food => (
+                      <div
+                        key={food._id}
+                        className="p-4 bg-gray-800 rounded-xl text-white shadow-md"
+                      >
+                        <h3 className="text-lg font-semibold">{food.foodName}</h3>
+                        <p>Price: ${food.price.toFixed(2)}</p>
+                        {food.image ? (
+                          <img
+                            src={food.image}
+                            alt={food.foodName}
+                            className="mt-2 w-full h-32 object-cover rounded-lg"
+                            onError={handleImageError(food._id)}
+                            onLoad={() => console.log(`Image loaded: ${food.image}`)}
+                          />
+                        ) : (
+                          <p className="text-gray-400">No image available</p>
+                        )}
+                        <p>Ingredients: {food.ingredients || "None"}</p>
+                        <p>Category: {food.category?.categoryName || "Unknown"}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-white">No foods in this category yet.</p>
                 )}
-                <p>
-                  Ingredients:{" "}
-                  {Array.isArray(food.ingredients)
-                    ? food.ingredients.join(", ")
-                    : food.ingredients || "None"}
-                </p>
-                <p>
-                  Category:{" "}
-                  {typeof food.category === "string"
-                    ? food.category
-                    : food.category?.name || "Unknown"}
-                </p>
               </div>
             ))}
+
+            {/* Optional: Display uncategorized foods */}
+            {uncategorizedFoods.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-4">Uncategorized Foods</h2>
+                <div className="space-y-4">
+                  {uncategorizedFoods.map(food => (
+                    <div
+                      key={food._id}
+                      className="p-4 bg-gray-800 rounded-xl text-white shadow-md"
+                    >
+                      <h3 className="text-lg font-semibold">{food.foodName}</h3>
+                      <p>Price: ${food.price.toFixed(2)}</p>
+                      {food.image ? (
+                        <img
+                          src={food.image}
+                          alt={food.foodName}
+                          className="mt-2 w-full h-32 object-cover rounded-lg"
+                          onError={handleImageError(food._id)}
+                          onLoad={() => console.log(`Image loaded: ${food.image}`)}
+                        />
+                      ) : (
+                        <p className="text-gray-400">No image available</p>
+                      )}
+                      <p>Ingredients: {food.ingredients || "None"}</p>
+                      <p>Category: None</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
