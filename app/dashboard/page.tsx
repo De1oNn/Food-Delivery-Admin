@@ -115,14 +115,24 @@ export default function Dashboard() {
   const food = () => {
     router.push("/food");
   };
+  const order = () => {
+    console.log("Navigating to /order..."); // Debug log
+    router.push("/order");
+  }
 
   // Rest of your JSX remains largely the same, with minor improvements:
   return (
     <div className="min-h-screen  text-white">
       <div className="flex flex-col items-center justify-center w-screen h-screen">
         <div className="text-center p-6 bg-gray-800 rounded-lg shadow-lg w-[300px] max-w-md w-">
-          <button onClick={food} className="h-[40px] w-[40px] bg-[white] rounded-2xl text-[black]" >
-            F
+          <button
+            onClick={food}
+            className="h-[40px] w-[40px] bg-[white] rounded-2xl text-[black]"
+          >
+            Food
+          </button>
+          <button onClick={order} className="h-[40px] w-[40px] bg-[white] rounded-2xl text-[black]">
+            order
           </button>
           <button
             onClick={handleLogout}

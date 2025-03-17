@@ -20,8 +20,8 @@ interface FoodItem {
   foodName: string;
   price: number;
   image: string;
-  ingredients: string; // Matches backend schema
-  category: { _id: string; categoryName: string }; // Populated category object
+  ingredients: string;
+  category: { _id: string; categoryName: string } | null; // Allow null for uncategorized foods
 }
 
 interface CategoryItem {
@@ -41,48 +41,38 @@ export default function Food() {
   const [categoryFormData, setCategoryFormData] = useState<CategoryFormData>({
     categoryName: "",
   });
-  const [category1Foods, setCategory1Foods] = useState<FoodItem[]>([]);
-  const [category2Foods, setCategory2Foods] = useState<FoodItem[]>([]);
+  const [foods, setFoods] = useState<FoodItem[]>([]); // Store foods
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const CATEGORY_1_ID = "67bef9404497237cdd8454ec";
-  const CATEGORY_2_ID = "65a7b2d8e12e3c4fbc123456";
-
-  // Fetch foods on component mount
+  // Fetch foods and categories on component mount
   useEffect(() => {
-    const fetchFoods = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:5000/food");
-        const data = await response.json();
-        if (response.ok) {
-          const foods: FoodItem[] = data.foods || [];
-          setCategory1Foods(foods.filter(food => food.category._id === CATEGORY_1_ID));
-          setCategory2Foods(foods.filter(food => food.category._id === CATEGORY_2_ID));
+        // Fetch foods
+        const foodResponse = await fetch("http://localhost:5000/food");
+        const foodData = await foodResponse.json();
+        if (!foodResponse.ok) {
+          throw new Error(foodData.message || "Failed to fetch foods");
         }
+        setFoods(foodData.foods || []);
+
+        // Fetch categories
+        const categoryResponse = await fetch(
+          "http://localhost:5000/food-category"
+        );
+        const categoryData = await categoryResponse.json();
+        if (!categoryResponse.ok) {
+          throw new Error(categoryData.message || "Failed to fetch categories");
+        }
+        setCategories(categoryData.categories || []);
       } catch (err) {
-        console.error("Error fetching foods:", err);
+        console.error("Error fetching data:", err);
       }
     };
-    fetchFoods();
-  }, []);
-
-  // Fetch categories on component mount
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/food-category");
-        const data = await response.json();
-        if (response.ok) {
-          setCategories(data.categories || []);
-        }
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    };
-    fetchCategories();
+    fetchData();
   }, []);
 
   const updateFoodField = (field: keyof FoodFormData) => (value: string) => {
@@ -92,12 +82,13 @@ export default function Food() {
     }));
   };
 
-  const updateCategoryField = (field: keyof CategoryFormData) => (value: string) => {
-    setCategoryFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const updateCategoryField =
+    (field: keyof CategoryFormData) => (value: string) => {
+      setCategoryFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    };
 
   const handleFoodSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -110,27 +101,20 @@ export default function Food() {
         foodName: foodFormData.foodName,
         price: parseFloat(foodFormData.price),
         image: foodFormData.image,
-        ingredients: foodFormData.ingredients, // Kept as string per schema
+        ingredients: foodFormData.ingredients,
         category: foodFormData.category,
       };
 
-      const response = await fetch("http://localhost:5000/food", { // Corrected endpoint
+      const response = await fetch("http://localhost:5000/food", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Food created successfully!");
-        if (data.food.category._id === CATEGORY_1_ID) {
-          setCategory1Foods(prev => [...prev, data.food]);
-        } else if (data.food.category._id === CATEGORY_2_ID) {
-          setCategory2Foods(prev => [...prev, data.food]);
-        }
+        setMessage(data.message || "Food created successfully!");
         setFoodFormData({
           foodName: "",
           price: "",
@@ -138,6 +122,8 @@ export default function Food() {
           ingredients: "",
           category: "",
         });
+        // Update foods list after successful creation
+        setFoods((prev) => [...prev, data.food]);
       } else {
         setError(data.message || "Failed to create food");
       }
@@ -158,15 +144,11 @@ export default function Food() {
     setIsLoading(true);
 
     try {
-      const requestBody = {
-        categoryName: categoryFormData.categoryName,
-      };
+      const requestBody = { categoryName: categoryFormData.categoryName };
 
       const response = await fetch("http://localhost:5000/food-category", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
       });
 
@@ -174,7 +156,7 @@ export default function Food() {
 
       if (response.ok) {
         setMessage("Category created successfully!");
-        setCategories(prev => [...prev, data.category]);
+        setCategories((prev) => [...prev, data.category]);
         setCategoryFormData({ categoryName: "" });
       } else {
         setError(data.message || "Failed to create category");
@@ -189,8 +171,16 @@ export default function Food() {
     }
   };
 
+  // Calculate food counts per category
+  const getFoodCountByCategory = (categoryId: string) => {
+    return foods.filter((food) => food.category?._id === categoryId).length;
+  };
+
+  // Calculate total food count
+  const totalFoodCount = foods.length;
+
   const back = () => router.push("/dashboard");
-  const foods = () => router.push("/foods");
+  const foodsPage = () => router.push("/foods");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -201,26 +191,55 @@ export default function Food() {
         >
           ←
         </button>
-        <h1 className="text-3xl font-bold text-white text-center mb-6">Food Management</h1>
-        <button
-          className="bg-[red] h-[50px] w-[100px] rounded-3xl m-[2px]"
-          onClick={foods}
-        >
-          Foods
-        </button>
+        <h1 className="text-3xl font-bold text-white text-center mb-6">
+          Food Management
+        </h1>
 
         {/* Create Category Form */}
-        <h2 className="text-2xl font-bold text-white mt-6 mb-4">Create Category</h2>
+        <h2 className="text-2xl font-bold text-white mt-6 mb-4">
+          Create Category
+        </h2>
         <form onSubmit={handleCategorySubmit} className="space-y-6">
           <div>
             <input
               type="text"
               value={categoryFormData.categoryName}
-              onChange={(e) => updateCategoryField("categoryName")(e.target.value)}
+              onChange={(e) =>
+                updateCategoryField("categoryName")(e.target.value)
+              }
               placeholder="Category Name"
               className="w-full p-3 rounded-xl bg-gray-800/50 text-white border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400"
               required
             />
+          </div>
+          <button
+            className="bg-[white] h-[50px] w-[150px] rounded-3xl m-[2px] text-black font-semibold"
+            onClick={foodsPage}
+          >
+            Foods <span>{totalFoodCount}</span>
+          </button>
+          <div>
+            {categories.length > 0 ? (
+              <ul className="space-y-4">
+                {categories.map((category) => (
+                  <li
+                    key={category._id}
+                    className="flex items-center h-[30px] gap-3"
+                  >
+                    <span className="bg-black text-white text-sm font-medium px-4 py-1 rounded-full shadow-md">
+                      {category.categoryName}
+                    </span>
+                    <span className="bg-red-600 text-white text-sm font-semibold px-3 py-1 rounded-lg">
+                      {getFoodCountByCategory(category._id)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-white text-lg font-medium text-center">
+                No categories available
+              </p>
+            )}
           </div>
           <button
             type="submit"
@@ -262,7 +281,7 @@ export default function Food() {
               onChange={(e) => updateFoodField("image")(e.target.value)}
               placeholder="Image URL"
               className="w-full p-3 rounded-xl bg-gray-800/50 text-white border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400"
-              required // Matches backend schema
+              required
             />
           </div>
           <div>
@@ -282,8 +301,10 @@ export default function Food() {
               className="w-full p-3 rounded-xl bg-gray-800/50 text-white border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400"
               required
             >
-              <option value="" disabled>Select a category</option>
-              {categories.map(category => (
+              <option value="" disabled>
+                Select a category
+              </option>
+              {categories.map((category) => (
                 <option key={category._id} value={category._id}>
                   {category.categoryName}
                 </option>
@@ -299,49 +320,10 @@ export default function Food() {
           </button>
         </form>
 
-        {message && <p className="mt-4 text-green-400 text-center">{message}</p>}
+        {message && (
+          <p className="mt-4 text-green-400 text-center">{message}</p>
+        )}
         {error && <p className="mt-4 text-red-400 text-center">{error}</p>}
-
-        {/* Display foods separated by category */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            {categories.find(c => c._id === CATEGORY_1_ID)?.categoryName || "Category 1"} Foods
-          </h2>
-          <div className="space-y-4">
-            {category1Foods.length > 0 ? (
-              category1Foods.map((food) => (
-                <div key={food._id} className="p-4 bg-gray-800 rounded-xl text-white shadow-md">
-                  <p><strong>Name:</strong> {food.foodName}</p>
-                  <p><strong>Price:</strong> ${food.price.toFixed(2)}</p>
-                  <img src={food.image} alt={food.foodName} className="mt-2 w-full h-32 object-cover rounded-lg" />
-                  <p><strong>Ingredients:</strong> {food.ingredients}</p>
-                  <p><strong>Category:</strong> {food.category.categoryName}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-white">No foods in this category yet.</p>
-            )}
-          </div>
-
-          <h2 className="text-2xl font-bold text-white mt-8 mb-4">
-            {categories.find(c => c._id === CATEGORY_2_ID)?.categoryName || "Category 2"} Foods
-          </h2>
-          <div className="space-y-4">
-            {category2Foods.length > 0 ? (
-              category2Foods.map((food) => (
-                <div key={food._id} className="p-4 bg-gray-800 rounded-xl text-white shadow-md">
-                  <p><strong>Name:</strong> {food.foodName}</p>
-                  <p><strong>Price:</strong> ${food.price.toFixed(2)}</p>
-                  <img src={food.image} alt={food.foodName} className="mt-2 w-full h-32 object-cover rounded-lg" />
-                  <p><strong>Ingredients:</strong> {food.ingredients}</p>
-                  <p><strong>Category:</strong> {food.category.categoryName}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-white">No foods in this category yet.</p>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );

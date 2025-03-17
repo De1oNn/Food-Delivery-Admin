@@ -9,7 +9,7 @@ interface FoodItem {
   price: number;
   image: string;
   ingredients: string;
-  category: { _id: string; categoryName: string } | null; // Allow null
+  category: { _id: string; categoryName: string } | null;
 }
 
 interface CategoryItem {
@@ -29,12 +29,23 @@ export default function Foods() {
       try {
         setError("");
 
-        // Fetch foods
+        const categoryResponse = await fetch(
+          "http://localhost:5000/food-category",
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        const categoryData = await categoryResponse.json();
+        console.log("Category response data:", categoryData);
+
+        if (!categoryResponse.ok) {
+          throw new Error(categoryData.message || "Failed to fetch categories");
+        }
+
         const foodResponse = await fetch("http://localhost:5000/food", {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         });
         const foodData = await foodResponse.json();
         console.log("Food response data:", foodData);
@@ -43,31 +54,28 @@ export default function Foods() {
           throw new Error(foodData.message || "Failed to fetch foods");
         }
 
-        // Fetch categories
-        const categoryResponse = await fetch("http://localhost:5000/food-category", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const categoryData = await categoryResponse.json();
-        console.log("Category response data:", categoryData);
-
-        if (!categoryResponse.ok) {
-          throw new Error(categoryData.message || "Failed to fetch categories");
-        }
-
-        // Filter out foods with null categories and log them
-        const validFoods = (foodData.foods || []).filter((food: FoodItem, index: number) => {
-          if (!food.category) {
-            console.warn(`Food ${index} (${food.foodName}) has null category`);
-            return false;
+        const validFoods = (foodData.foods || []).filter(
+          (food: FoodItem, index: number) => {
+            if (!food.category) {
+              console.warn(
+                `Food ${index} (${food.foodName}) has null category`
+              );
+              return true;
+            }
+            const categoryExists = (categoryData.categories || []).some(
+              (cat: CategoryItem) => cat._id === food.category?._id
+            );
+            if (!categoryExists) {
+              console.warn(
+                `Food ${index} (${food.foodName}) has unmatched category: ${food.category?._id}`
+              );
+            }
+            return true;
           }
-          return true;
-        });
+        );
 
-        setFoods(validFoods);
         setCategories(categoryData.categories || []);
+        setFoods(validFoods);
       } catch (err) {
         console.error("Fetch error:", err);
         setError(
@@ -81,23 +89,24 @@ export default function Foods() {
     fetchData();
   }, []);
 
-  // Group foods by category, including an "Uncategorized" group for edge cases
   const groupedFoods = categories.reduce((acc, category) => {
-    acc[category._id] = foods.filter(food => food.category?._id === category._id);
+    acc[category._id] = foods.filter(
+      (food) => food.category?._id === category._id
+    );
     return acc;
   }, {} as Record<string, FoodItem[]>);
 
-  // Handle foods with null categories separately (optional)
-  const uncategorizedFoods = foods.filter(food => !food.category);
+  const uncategorizedFoods = foods.filter((food) => !food.category);
 
-  const back = () => {
-    router.push("/food");
-  };
+  const back = () => router.push("/food");
 
-  const handleImageError = (foodId: string) => (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error(`Image failed to load for food ID ${foodId}: ${e.currentTarget.src}`);
-    e.currentTarget.style.display = "none"; // Hide broken image
-  };
+  const handleImageError =
+    (foodId: string) => (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+      console.error(
+        `Image failed to load for food ID ${foodId}: ${e.currentTarget.src}`
+      );
+      e.currentTarget.style.display = "none"; // Hide broken image
+    };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -117,36 +126,48 @@ export default function Foods() {
         ) : error ? (
           <p className="mt-4 text-red-400 text-center">{error}</p>
         ) : categories.length === 0 && foods.length === 0 ? (
-          <p className="text-white text-center">No foods or categories found.</p>
+          <p className="text-white text-center">
+            No foods or categories found.
+          </p>
         ) : (
           <div className="space-y-8">
-            {categories.map(category => (
+            {categories.map((category) => (
               <div key={category._id}>
                 <h2 className="text-2xl font-bold text-white mb-4">
-                  {category.categoryName} Foods
+                  {category.categoryName}
                 </h2>
                 {groupedFoods[category._id]?.length > 0 ? (
                   <div className="space-y-4">
-                    {groupedFoods[category._id].map(food => (
+                    {groupedFoods[category._id].map((food) => (
                       <div
                         key={food._id}
                         className="p-4 bg-gray-800 rounded-xl text-white shadow-md"
                       >
-                        <h3 className="text-lg font-semibold">{food.foodName}</h3>
+                        <h3 className="text-lg font-semibold">
+                          {food.foodName}
+                        </h3>
                         <p>Price: ${food.price.toFixed(2)}</p>
-                        {food.image ? (
+                        {food.image &&
+                        food.image.trim() !== "" &&
+                        food.image.startsWith("http") ? (
                           <img
                             src={food.image}
                             alt={food.foodName}
                             className="mt-2 w-full h-32 object-cover rounded-lg"
                             onError={handleImageError(food._id)}
-                            onLoad={() => console.log(`Image loaded: ${food.image}`)}
+                            onLoad={() =>
+                              console.log(`Image loaded: ${food.image}`)
+                            }
                           />
                         ) : (
-                          <p className="text-gray-400">No image available</p>
+                          <p className="text-gray-400">
+                            No valid image available
+                          </p>
                         )}
                         <p>Ingredients: {food.ingredients || "None"}</p>
-                        <p>Category: {food.category?.categoryName || "Unknown"}</p>
+                        <p>
+                          Category: {food.category?.categoryName || "Unknown"}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -156,28 +177,35 @@ export default function Foods() {
               </div>
             ))}
 
-            {/* Optional: Display uncategorized foods */}
             {uncategorizedFoods.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold text-white mb-4">Uncategorized Foods</h2>
+                <h2 className="text-2xl font-bold text-white mb-4">
+                  Uncategorized Foods
+                </h2>
                 <div className="space-y-4">
-                  {uncategorizedFoods.map(food => (
+                  {uncategorizedFoods.map((food) => (
                     <div
                       key={food._id}
                       className="p-4 bg-gray-800 rounded-xl text-white shadow-md"
                     >
                       <h3 className="text-lg font-semibold">{food.foodName}</h3>
                       <p>Price: ${food.price.toFixed(2)}</p>
-                      {food.image ? (
+                      {food.image &&
+                      food.image.trim() !== "" &&
+                      food.image.startsWith("http") ? (
                         <img
                           src={food.image}
                           alt={food.foodName}
                           className="mt-2 w-full h-32 object-cover rounded-lg"
                           onError={handleImageError(food._id)}
-                          onLoad={() => console.log(`Image loaded: ${food.image}`)}
+                          onLoad={() =>
+                            console.log(`Image loaded: ${food.image}`)
+                          }
                         />
                       ) : (
-                        <p className="text-gray-400">No image available</p>
+                        <p className="text-gray-400">
+                          No valid image available
+                        </p>
                       )}
                       <p>Ingredients: {food.ingredients || "None"}</p>
                       <p>Category: None</p>
