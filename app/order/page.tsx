@@ -2,16 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
-interface Food {
-  _id: string;
-  foodName: string;
-  price: number;
-  category: { _id: string; categoryName: string } | null;
-}
+import Image from "next/image";
 
 interface FoodOrderItem {
-  food: { foodName: string; price: number; _id?: string } | null; // Ensure food is nullable
+  food: {
+    foodName: string;
+    price: number;
+    image: string; 
+  } | null;
   quantity: number;
 }
 
@@ -24,61 +22,75 @@ interface Order {
 
 export default function Order() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [foods, setFoods] = useState<Food[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchOrders = async () => {
       try {
         setError("");
+        setIsLoading(true);
 
-        // Fetch orders
-        const orderResponse = await fetch("http://localhost:5000/order", {
+        const token = localStorage.getItem("token"); // Add token for authentication
+        if (!token) {
+          throw new Error("Please login first");
+        }
+
+        const response = await fetch("http://localhost:5000/order", {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Include token if required by backend
+          },
         });
-        const orderData = await orderResponse.json();
-        console.log("Fetched Orders:", orderData); // Debugging
 
-        if (!orderResponse.ok) {
+        const orderData = await response.json();
+        console.log("Fetched Orders:", orderData);
+
+        console.log(orderData, );
+        
+        if (!response.ok) {
           throw new Error(orderData.message || "Failed to fetch orders");
         }
 
-        // Fetch foods
-        const foodResponse = await fetch("http://localhost:5000/food", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        const foodData = await foodResponse.json();
-        console.log("Fetched Foods:", foodData); // Debugging
-
-        if (!foodResponse.ok) {
-          throw new Error(foodData.message || "Failed to fetch foods");
-        }
-
-        // Set state
         setOrders(orderData.orders || []);
-        setFoods(foodData.foods || []);
       } catch (err) {
         console.error("Fetch error:", err);
-        setError(`Failed to load data: ${err instanceof Error ? err.message : "Unknown"}`);
+        setError(
+          `Failed to load data: ${
+            err instanceof Error ? err.message : "Unknown"
+          }`
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchData();
+    fetchOrders();
   }, []);
 
-  // Helper function to get full food details by ID
-  const getFoodDetails = (foodId: string): Food | null => {
-    return foods.find((food) => food._id === foodId) || null;
-  };
   const back = () => {
     router.push("/dashboard");
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+        <p className="text-white">Loading orders...</p>
+      </div>
+    );
   }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+        <p className="text-red-400">{error}</p>
+      </div>
+    );
+  }
+  const randomImg =
+    "https://images.unsplash.com/photo-1604908550665-32…xMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
@@ -93,11 +105,7 @@ export default function Order() {
           All Orders!
         </h1>
 
-        {isLoading ? (
-          <p className="text-white text-center">Loading orders...</p>
-        ) : error ? (
-          <p className="text-red-400 text-center">{error}</p>
-        ) : orders.length === 0 ? (
+        {orders.length === 0 ? (
           <p className="text-white text-center">No orders found.</p>
         ) : (
           <div className="space-y-6">
@@ -112,43 +120,54 @@ export default function Order() {
                 <p className="text-gray-400 text-sm">
                   Placed on: {new Date(order.createdAt).toLocaleString()}
                 </p>
-                <ul className="mt-4 space-y-2">
+                <ul className="mt-4 space-y-4">
                   {order.foodOrderItems && order.foodOrderItems.length > 0 ? (
                     order.foodOrderItems.map((item, index) => {
-                      if (!item.food)
+                      if (!item.food) {
+                        console.log(`Item ${index}: No food data`);
                         return (
                           <li key={index} className="text-gray-400">
                             Unknown Food (x{item.quantity})
                           </li>
                         );
+                      }
 
-                      const fullFood = item.food._id
-                        ? getFoodDetails(item.food._id)
-                        : null;
+                      const displayImage = item.food.image || randomImg;
+                      const foodName = item.food.foodName || "Unknown Food";
+
+                      // console.log(
+                      //   `Item ${index} - Name: ${foodName}, Image: ${
+                      //     displayImage || "None"
+                      //   }`
+                      // );
 
                       return (
-                        <li key={index} className="flex justify-between">
-                          <span>
-                            {fullFood?.foodName ??
-                              item.food?.foodName ??
-                              "Unknown Food"}{" "}
-                            (x
-                            {item.quantity}){" "}
-                            {fullFood?.category && (
-                              <span className="text-gray-400">
-                                [{fullFood.category.categoryName}]
-                              </span>
-                            )}
-                          </span>
-                          <span>
-                            $
-                            {(fullFood?.price && item.quantity
-                              ? fullFood.price * item.quantity
-                              : item.food?.price && item.quantity
-                              ? item.food.price * item.quantity
-                              : 0
-                            ).toFixed(2)}
-                          </span>
+                        <li key={index} className="flex items-center gap-4">
+                          {displayImage ? (
+                            <Image
+                              src={displayImage }
+                              width={500}
+                              height={500}
+                              alt="Picture of the author"
+                              className="w-16 h-16 object-cover rounded-md"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 flex items-center justify-center bg-gray-700 rounded-md text-gray-400 text-sm">
+                              No Image
+                            </div>
+                          )}
+                          <div className="flex-1 flex justify-between">
+                            <span>
+                              {foodName} (x{item.quantity})
+                            </span>
+                            <span>
+                              $
+                              {(item.food.price && item.quantity
+                                ? item.food.price * item.quantity
+                                : 0
+                              ).toFixed(2)}
+                            </span>
+                          </div>
                         </li>
                       );
                     })
@@ -162,15 +181,8 @@ export default function Order() {
                     ? order.foodOrderItems
                         .reduce((acc, item) => {
                           if (!item.food) return acc;
-
-                          const fullFood = item.food._id
-                            ? getFoodDetails(item.food._id)
-                            : null;
-
                           return (
-                            acc +
-                            (fullFood?.price ?? item.food?.price ?? 0) *
-                              (item.quantity ?? 0)
+                            acc + (item.food.price ?? 0) * (item.quantity ?? 0)
                           );
                         }, 0)
                         .toFixed(2)
