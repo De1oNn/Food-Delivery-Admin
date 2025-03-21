@@ -21,7 +21,7 @@ interface FoodItem {
   price: number;
   image: string;
   ingredients: string;
-  category: { _id: string; categoryName: string } | null; // Allow null for uncategorized foods
+  category: { _id: string; categoryName: string } | null;
 }
 
 interface CategoryItem {
@@ -41,32 +41,27 @@ export default function Food() {
   const [categoryFormData, setCategoryFormData] = useState<CategoryFormData>({
     categoryName: "",
   });
-  const [foods, setFoods] = useState<FoodItem[]>([]); // Store foods
+  const [foods, setFoods] = useState<FoodItem[]>([]);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Fetch foods and categories on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch foods
         const foodResponse = await fetch("http://localhost:5000/food");
         const foodData = await foodResponse.json();
-        if (!foodResponse.ok) {
+        if (!foodResponse.ok)
           throw new Error(foodData.message || "Failed to fetch foods");
-        }
         setFoods(foodData.foods || []);
 
-        // Fetch categories
         const categoryResponse = await fetch(
           "http://localhost:5000/food-category"
         );
         const categoryData = await categoryResponse.json();
-        if (!categoryResponse.ok) {
+        if (!categoryResponse.ok)
           throw new Error(categoryData.message || "Failed to fetch categories");
-        }
         setCategories(categoryData.categories || []);
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -75,20 +70,12 @@ export default function Food() {
     fetchData();
   }, []);
 
-  const updateFoodField = (field: keyof FoodFormData) => (value: string) => {
-    setFoodFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const updateFoodField = (field: keyof FoodFormData) => (value: string) =>
+    setFoodFormData((prev) => ({ ...prev, [field]: value }));
 
   const updateCategoryField =
-    (field: keyof CategoryFormData) => (value: string) => {
-      setCategoryFormData((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    };
+    (field: keyof CategoryFormData) => (value: string) =>
+      setCategoryFormData((prev) => ({ ...prev, [field]: value }));
 
   const handleFoodSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -122,7 +109,6 @@ export default function Food() {
           ingredients: "",
           category: "",
         });
-        // Update foods list after successful creation
         setFoods((prev) => [...prev, data.food]);
       } else {
         setError(data.message || "Failed to create food");
@@ -171,134 +157,134 @@ export default function Food() {
     }
   };
 
-  // Calculate food counts per category
-  const getFoodCountByCategory = (categoryId: string) => {
-    return foods.filter((food) => food.category?._id === categoryId).length;
-  };
+  const getFoodCountByCategory = (categoryId: string) =>
+    foods.filter((food) => food.category?._id === categoryId).length;
 
-  // Calculate total food count
   const totalFoodCount = foods.length;
 
   const back = () => router.push("/dashboard");
   const foodsPage = () => router.push("/foods");
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="relative max-w-2xl w-full bg-white/10 backdrop-blur-lg p-8 rounded-3xl shadow-2xl border border-white/20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
+      <div className="max-w-4xl mx-auto">
         <button
           onClick={back}
-          className="absolute top-4 left-4 bg-white h-6 w-6 rounded-full flex items-center justify-center text-black font-bold"
+          className="mb-6 h-10 w-10 bg-teal-500 text-white rounded-full flex items-center justify-center hover:bg-teal-600 transition-all duration-300 shadow-md"
         >
-          ←
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
         </button>
-        <h1 className="text-3xl font-bold text-white text-center mb-6">
+
+        <h1 className="text-4xl font-extrabold text-white text-center mb-8">
           Food Management
         </h1>
 
-        {/* Create Category Form */}
-        <h2 className="text-2xl font-bold text-white mt-6 mb-4">
-          Create Category
-        </h2>
-        <form onSubmit={handleCategorySubmit} className="space-y-6">
-          <div>
-            <input
-              type="text"
-              value={categoryFormData.categoryName}
-              onChange={(e) =>
-                updateCategoryField("categoryName")(e.target.value)
-              }
-              placeholder="Category Name"
-              className="w-full p-3 rounded-xl bg-gray-800/50 text-white border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400"
-              required
-            />
-          </div>
-          <button
-            className="bg-[white] h-[50px] w-[150px] rounded-3xl m-[2px] text-black font-semibold"
-            onClick={foodsPage}
-          >
-            Foods <span>{totalFoodCount}</span>
-          </button>
-          <div>
-            {categories.length > 0 ? (
-              <ul className="space-y-4">
+        <div className="mb-10">
+          <h2 className="text-2xl font-semibold text-teal-400 mb-6">
+            Create Category
+          </h2>
+          <div className="bg-gray-800/50 backdrop-blur-md p-6 rounded-xl shadow-lg">
+            <form onSubmit={handleCategorySubmit} className="space-y-6">
+              <input
+                type="text"
+                value={categoryFormData.categoryName}
+                onChange={(e) =>
+                  updateCategoryField("categoryName")(e.target.value)
+                }
+                placeholder="Category Name"
+                className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
+                required
+              />
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-6 py-3 bg-teal-500 text-white rounded-full hover:bg-teal-600 disabled:bg-gray-500 transition-all duration-300 shadow-md hover:shadow-teal-500/30"
+                >
+                  {isLoading ? "Creating..." : "Create Category"}
+                </button>
+                <button
+                  onClick={foodsPage}
+                  className="px-6 py-3 bg-teal-500 text-white rounded-full hover:bg-teal-600 transition-all duration-300 shadow-md hover:shadow-teal-500/30"
+                >
+                  Foods ({totalFoodCount})
+                </button>
+              </div>
+            </form>
+            {categories.length > 0 && (
+              <div className="mt-6 space-y-4">
                 {categories.map((category) => (
-                  <li
+                  <div
                     key={category._id}
-                    className="flex items-center h-[30px] gap-3"
+                    className="flex items-center justify-between"
                   >
-                    <span className="bg-black text-white text-sm font-medium px-4 py-1 rounded-full shadow-md">
+                    <p className="text-lg text-white">
                       {category.categoryName}
-                    </span>
-                    <span className="bg-red-600 text-white text-sm font-semibold px-3 py-1 rounded-lg">
-                      {getFoodCountByCategory(category._id)}
-                    </span>
-                  </li>
+                    </p>
+                    <p className="text-sm text-teal-400">
+                      {getFoodCountByCategory(category._id)} items
+                    </p>
+                  </div>
                 ))}
-              </ul>
-            ) : (
-              <p className="text-white text-lg font-medium text-center">
-                No categories available
-              </p>
+              </div>
             )}
           </div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full p-3 rounded-xl text-white font-semibold bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 transition-all disabled:opacity-50"
-          >
-            {isLoading ? "Creating..." : "Create Category"}
-          </button>
-        </form>
+        </div>
 
-        {/* Create Food Form */}
-        <h2 className="text-2xl font-bold text-white mt-6 mb-4">Create Food</h2>
-        <form onSubmit={handleFoodSubmit} className="space-y-6">
-          <div>
+        <div className="bg-gray-800/50 backdrop-blur-md p-6 rounded-xl shadow-lg">
+          <h2 className="text-2xl font-semibold text-teal-400 mb-6">
+            Create Food
+          </h2>
+          <form onSubmit={handleFoodSubmit} className="space-y-6">
             <input
               type="text"
               value={foodFormData.foodName}
               onChange={(e) => updateFoodField("foodName")(e.target.value)}
               placeholder="Food Name"
-              className="w-full p-3 rounded-xl bg-gray-800/50 text-white border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400"
+              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
               required
             />
-          </div>
-          <div>
             <input
               type="number"
               value={foodFormData.price}
               onChange={(e) => updateFoodField("price")(e.target.value)}
               placeholder="Price"
               step="0.01"
-              className="w-full p-3 rounded-xl bg-gray-800/50 text-white border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400"
+              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
               required
             />
-          </div>
-          <div>
             <input
               type="text"
               value={foodFormData.image}
               onChange={(e) => updateFoodField("image")(e.target.value)}
               placeholder="Image URL"
-              className="w-full p-3 rounded-xl bg-gray-800/50 text-white border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400"
+              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
               required
             />
-          </div>
-          <div>
             <input
               type="text"
               value={foodFormData.ingredients}
               onChange={(e) => updateFoodField("ingredients")(e.target.value)}
               placeholder="Ingredients (comma-separated)"
-              className="w-full p-3 rounded-xl bg-gray-800/50 text-white border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400"
+              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
               required
             />
-          </div>
-          <div>
             <select
               value={foodFormData.category}
               onChange={(e) => updateFoodField("category")(e.target.value)}
-              className="w-full p-3 rounded-xl bg-gray-800/50 text-white border border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400"
+              className="w-full px-4 py-3 bg-gray-700/70 text-white rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
               required
             >
               <option value="" disabled>
@@ -310,20 +296,20 @@ export default function Food() {
                 </option>
               ))}
             </select>
-          </div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full p-3 rounded-xl text-white font-semibold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50"
-          >
-            {isLoading ? "Creating..." : "Create Food"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full px-6 py-3 bg-teal-500 text-white rounded-full hover:bg-teal-600 disabled:bg-gray-500 transition-all duration-300 shadow-lg hover:shadow-teal-500/30"
+            >
+              {isLoading ? "Creating..." : "Create Food"}
+            </button>
+          </form>
+        </div>
 
         {message && (
-          <p className="mt-4 text-green-400 text-center">{message}</p>
+          <p className="mt-6 text-green-400 text-center">{message}</p>
         )}
-        {error && <p className="mt-4 text-red-400 text-center">{error}</p>}
+        {error && <p className="mt-6 text-red-400 text-center">{error}</p>}
       </div>
     </div>
   );
