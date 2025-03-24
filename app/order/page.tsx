@@ -38,9 +38,7 @@ export default function Order({ username }: { username?: string }) {
         if (!token) throw new Error("Please login first");
 
         const url = username
-          ? `http://localhost:5000/order?username=${encodeURIComponent(
-              username
-            )}`
+          ? `http://localhost:5000/order?username=${encodeURIComponent(username)}`
           : "http://localhost:5000/order";
 
         const response = await fetch(url, {
@@ -61,9 +59,7 @@ export default function Order({ username }: { username?: string }) {
       } catch (err) {
         console.error("Fetch error:", err);
         setError(
-          `Failed to load data: ${
-            err instanceof Error ? err.message : "Unknown"
-          }`
+          `Failed to load data: ${err instanceof Error ? err.message : "Unknown"}`
         );
       } finally {
         setIsLoading(false);
@@ -93,23 +89,18 @@ export default function Order({ username }: { username?: string }) {
       });
 
       const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.message || "Failed to update status");
+      if (!response.ok) throw new Error(result.message || "Failed to update status");
 
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order._id === orderId
-            ? { ...order, status: newStatus as Order["status"] }
-            : order
+          order._id === orderId ? { ...order, status: newStatus as Order["status"] } : order
         )
       );
       alert("Status updated successfully!");
     } catch (err) {
       console.error("Update status error:", err);
       setError(
-        `Failed to update status: ${
-          err instanceof Error ? err.message : "Unknown"
-        }`
+        `Failed to update status: ${err instanceof Error ? err.message : "Unknown"}`
       );
     }
   };
@@ -163,9 +154,7 @@ export default function Order({ username }: { username?: string }) {
 
         <main className="w-full max-w-6xl mx-auto">
           {orders.length === 0 ? (
-            <p className="text-gray-400 text-center text-lg">
-              No orders found.
-            </p>
+            <p className="text-gray-400 text-center text-lg">No orders found.</p>
           ) : (
             <div className="bg-gray-800/50 backdrop-blur-md rounded-xl shadow-xl p-6">
               <table className="w-full table-auto border-collapse">
@@ -181,72 +170,37 @@ export default function Order({ username }: { username?: string }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map((order) => (
-                    <tr
-                      key={order._id}
-                      className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors duration-200"
-                    >
-                      <td className="p-4">{order._id.slice(-6)}</td>
-                      <td className="p-4">
-                        {order.user?.name ?? "Unknown User"}
-                      </td>
-                      <td className="p-4">
-                        <ul className="space-y-3">
-                          {order.foodOrderItems.map((item, index) => {
-                            const foodName =
-                              item.food?.foodName || "Unknown Food";
-                            return (
-                              <li
-                                key={index}
-                                className="flex items-center gap-4"
-                              >
-                                <Image
-                                  src={item.food?.image || randomImg}
-                                  width={48}
-                                  height={48}
-                                  alt={foodName}
-                                  className="w-12 h-12 object-cover rounded-lg shadow-md border border-gray-600"
-                                  onError={(e) =>
-                                    (e.currentTarget.src = randomImg)
-                                  }
-                                />
-                                <div>
-                                  <span className="font-medium">
-                                    {foodName}
-                                  </span>
-                                  <span className="text-gray-400 ml-2">
-                                    (x{item.quantity})
-                                  </span>
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </td>
-                      <td className="p-4">{getTotalQuantity(order)}</td>
-                      <td className="p-4 text-orange-400 font-medium">
-                        ${getTotalPrice(order)}
-                      </td>
-                      <td className="p-4">
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="p-4">
-                        <select
-                          value={order.status}
-                          onChange={(e) =>
-                            updateOrderStatus(order._id, e.target.value)
-                          }
-                          className="bg-gray-700 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 hover:bg-gray-600 transition-colors duration-200"
-                        >
-                          {statusOptions.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
+                  {orders.map((order) => (<tr key={order._id} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors duration-200"><td className="p-4">{order._id.slice(-6)}</td><td className="p-4">{order.user?.name ?? "Unknown User"}</td><td className="p-4"><ul className="space-y-3">{order.foodOrderItems.map((item, index) => {
+                    const foodName = item.food?.foodName || "Unknown Food";
+                    return (
+                      <li key={index} className="flex items-center gap-4">
+                        <Image
+                          src={item.food?.image || randomImg}
+                          width={48}
+                          height={48}
+                          alt={foodName}
+                          className="w-12 h-12 object-cover rounded-lg shadow-md border border-gray-600"
+                          onError={(e) => (e.currentTarget.src = randomImg)}
+                        />
+                        <div>
+                          <span className="font-medium">{foodName}</span>
+                          <span className="text-gray-400 ml-2">
+                            (x{item.quantity})
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}</ul></td><td className="p-4">{getTotalQuantity(order)}</td><td className="p-4 text-orange-400 font-medium">${getTotalPrice(order)}</td><td className="p-4">{new Date(order.createdAt).toLocaleDateString()}</td><td className="p-4"><select
+                    value={order.status}
+                    onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                    className="bg-gray-700 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 hover:bg-gray-600 transition-colors duration-200"
+                  >
+                    {statusOptions.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select></td></tr>))}
                 </tbody>
               </table>
             </div>

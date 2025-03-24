@@ -22,7 +22,6 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-
   useEffect(() => {
     const fetchUserData = async () => {
       const storedUser = localStorage.getItem("user");
@@ -39,7 +38,6 @@ export default function Dashboard() {
     fetchUserData();
   }, [router]);
 
-  
   const food = () => router.push("/food");
   const order = () => router.push("/order");
   const profile = () => router.push("/dashboard/profile");
@@ -49,22 +47,22 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-blue-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       {/* Sidebar */}
       <aside className="fixed top-0 left-0 h-full w-[100px] bg-orange-600 shadow-lg flex flex-col items-center py-6 space-y-8 z-10">
         <div
-          className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-full cursor-pointer hover:bg-gray-600 transition-colors"
+          className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-full cursor-pointer hover:bg-gray-600 transition-colors duration-300"
           onClick={profile}
         >
           <span className="text-xl font-bold text-white">
             {user?.name?.[0] || "U"}
           </span>
         </div>
-        {/* Removed Bell and ShoppingCart */}
       </aside>
 
       {/* Main Content */}
       <div className="ml-[100px] p-6">
+        {/* Header */}
         <header className="bg-gray-800/50 backdrop-blur-lg rounded-xl shadow-lg p-4 flex justify-center items-center mb-6">
           <div className="relative flex items-center w-full max-w-md">
             <input
@@ -91,29 +89,30 @@ export default function Dashboard() {
           </div>
         </header>
 
+        {/* Main Section */}
         <main className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)]">
-          
-            <div className="w-full max-w-4xl">
-              <h1 className="text-3xl font-bold text-center mb-8">
-                Admin Dashboard
-              </h1>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <button
-                  onClick={food}
-                  className="group relative flex items-center justify-center h-16 bg-white text-black rounded-lg font-semibold shadow-md hover:bg-gray-200 transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-                >
-                  <span className="text-lg">Food</span>
-                  <span className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-blue-500 transition-all duration-300"></span>
-                </button>
-                <button
-                  onClick={order}
-                  className="group relative flex items-center justify-center h-16 bg-white text-black rounded-lg font-semibold shadow-md hover:bg-gray-200 transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-                >
-                  <span className="text-lg">Orders</span>
-                  <span className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-green-500 transition-all duration-300"></span>
-                </button>
-              </div>
+          <div className="w-full max-w-4xl text-center space-y-8">
+            <h1 className="text-5xl font-extrabold tracking-tight">
+              Admin <span className="text-orange-500">Dashboard</span>
+            </h1>
+            <p className="text-gray-300 text-lg max-w-md mx-auto">
+              Manage foods and orders efficiently from your admin panel.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <button
+                onClick={food}
+                className="px-8 py-4 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-orange-500/30"
+              >
+                Manage Foods
+              </button>
+              <button
+                onClick={order}
+                className="px-8 py-4 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-orange-500/30"
+              >
+                Manage Orders
+              </button>
             </div>
+          </div>
         </main>
       </div>
     </div>

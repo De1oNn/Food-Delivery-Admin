@@ -168,9 +168,10 @@ export default function Food() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
       <div className="max-w-4xl mx-auto">
+        {/* Back Button */}
         <button
           onClick={back}
-          className="mb-6 h-10 w-10 bg-teal-500 text-white rounded-full flex items-center justify-center hover:bg-teal-600 transition-all duration-300 shadow-md"
+          className="mb-6 h-10 w-10 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition-all duration-300 shadow-md"
         >
           <svg
             className="w-5 h-5"
@@ -187,12 +188,14 @@ export default function Food() {
           </svg>
         </button>
 
+        {/* Header */}
         <h1 className="text-4xl font-extrabold text-white text-center mb-8">
           Food Management
         </h1>
 
+        {/* Create Category Section */}
         <div className="mb-10">
-          <h2 className="text-2xl font-semibold text-teal-400 mb-6">
+          <h2 className="text-2xl font-semibold text-orange-400 mb-6">
             Create Category
           </h2>
           <div className="bg-gray-800/50 backdrop-blur-md p-6 rounded-xl shadow-lg">
@@ -204,36 +207,37 @@ export default function Food() {
                   updateCategoryField("categoryName")(e.target.value)
                 }
                 placeholder="Category Name"
-                className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
+                className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
                 required
               />
               <div className="flex flex-wrap gap-3">
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-6 py-3 bg-teal-500 text-white rounded-full hover:bg-teal-600 disabled:bg-gray-500 transition-all duration-300 shadow-md hover:shadow-teal-500/30"
+                  className="px-6 py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 disabled:bg-gray-500 transition-all duration-300 shadow-md hover:shadow-orange-500/30"
                 >
                   {isLoading ? "Creating..." : "Create Category"}
                 </button>
                 <button
                   onClick={foodsPage}
-                  className="px-6 py-3 bg-teal-500 text-white rounded-full hover:bg-teal-600 transition-all duration-300 shadow-md hover:shadow-teal-500/30"
+                  className="px-6 py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-all duration-300 shadow-md hover:shadow-orange-500/30"
                 >
                   Foods ({totalFoodCount})
                 </button>
               </div>
             </form>
             {categories.length > 0 && (
-              <div className="mt-6 space-y-4">
+              <div className="flex flex-wrap gap-3 mb-6 mt-6 ">
+                
                 {categories.map((category) => (
                   <div
                     key={category._id}
-                    className="flex items-center justify-between"
+                    className="px-4 py-2 rounded-full text-white font-medium transition-all duration-300 shadow-md bg-gray-700/50 "
                   >
                     <p className="text-lg text-white">
                       {category.categoryName}
                     </p>
-                    <p className="text-sm text-teal-400">
+                    <p className="text-sm text-orange-400">
                       {getFoodCountByCategory(category._id)} items
                     </p>
                   </div>
@@ -243,8 +247,9 @@ export default function Food() {
           </div>
         </div>
 
+        {/* Create Food Section */}
         <div className="bg-gray-800/50 backdrop-blur-md p-6 rounded-xl shadow-lg">
-          <h2 className="text-2xl font-semibold text-teal-400 mb-6">
+          <h2 className="text-2xl font-semibold text-orange-400 mb-6">
             Create Food
           </h2>
           <form onSubmit={handleFoodSubmit} className="space-y-6">
@@ -253,7 +258,7 @@ export default function Food() {
               value={foodFormData.foodName}
               onChange={(e) => updateFoodField("foodName")(e.target.value)}
               placeholder="Food Name"
-              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
+              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
               required
             />
             <input
@@ -262,7 +267,7 @@ export default function Food() {
               onChange={(e) => updateFoodField("price")(e.target.value)}
               placeholder="Price"
               step="0.01"
-              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
+              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
               required
             />
             <input
@@ -270,7 +275,7 @@ export default function Food() {
               value={foodFormData.image}
               onChange={(e) => updateFoodField("image")(e.target.value)}
               placeholder="Image URL"
-              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
+              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
               required
             />
             <input
@@ -278,13 +283,13 @@ export default function Food() {
               value={foodFormData.ingredients}
               onChange={(e) => updateFoodField("ingredients")(e.target.value)}
               placeholder="Ingredients (comma-separated)"
-              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
+              className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
               required
             />
             <select
               value={foodFormData.category}
               onChange={(e) => updateFoodField("category")(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-700/70 text-white rounded-full border-2 border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300"
+              className="w-full px-4 py-3 bg-gray-700/70 text-white rounded-full border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
               required
             >
               <option value="" disabled>
@@ -299,13 +304,14 @@ export default function Food() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full px-6 py-3 bg-teal-500 text-white rounded-full hover:bg-teal-600 disabled:bg-gray-500 transition-all duration-300 shadow-lg hover:shadow-teal-500/30"
+              className="w-full px-6 py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 disabled:bg-gray-500 transition-all duration-300 shadow-lg hover:shadow-orange-500/30"
             >
               {isLoading ? "Creating..." : "Create Food"}
             </button>
           </form>
         </div>
 
+        {/* Messages */}
         {message && (
           <p className="mt-6 text-green-400 text-center">{message}</p>
         )}
