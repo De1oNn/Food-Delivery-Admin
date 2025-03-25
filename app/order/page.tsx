@@ -22,11 +22,15 @@ interface Order {
   status: "PENDING" | "CANCELED" | "DELIVERED";
 }
 
-export default function Order({ username }: { username?: string }) {
+interface OrderProps {
+  username?: string;
+}
+
+export default function Order({ username }: OrderProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-  const [expandedOrder, setExpandedOrder] = useState<string | null>(null); // New state for toggling
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
