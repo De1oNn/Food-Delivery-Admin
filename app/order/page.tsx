@@ -23,7 +23,7 @@ interface Order {
 }
 
 interface OrderProps {
-  username?: string;
+  username: string;
 }
 
 export default function Order({ username }: OrderProps) {
