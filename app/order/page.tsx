@@ -22,16 +22,14 @@ interface Order {
   status: "PENDING" | "CANCELED" | "DELIVERED";
 }
 
-interface OrderProps {
-  username?: string;
-}
-
-export default function Order({ username }: OrderProps) {
+export default function Order() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const router = useRouter();
+
+  const [username, setUsername] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const fetchOrders = async () => {
