@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { Bell } from "lucide-react";
+import { Bell, MapPin } from "lucide-react";
 
 interface User {
   _id: string;
@@ -30,6 +30,16 @@ interface Notification {
   createdAt: string;
 }
 
+interface Restaurant {
+  _id: string;
+  location: string;
+  picture: string;
+  name: string;
+  information: string;
+  phoneNumber: number;
+  createdAt: string;
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -41,6 +51,16 @@ export default function Dashboard() {
   const [isNotifModalOpen, setIsNotifModalOpen] = useState<boolean>(false);
   const [notifMessage, setNotifMessage] = useState<string>("");
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isRestaurantModalOpen, setIsRestaurantModalOpen] =
+    useState<boolean>(false);
+  const [restaurantData, setRestaurantData] = useState({
+    location: "",
+    picture: "",
+    name: "",
+    information: "",
+    phoneNumber: "",
+  });
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -94,34 +114,94 @@ export default function Dashboard() {
     }
   };
 
+const fetchRestaurants = async () => {
+  try {
+    const res = await axios.get<{ restaurants: Restaurant[] }>(
+      "http://localhost:5000/restaurant"
+    );
+    setRestaurants(res.data.restaurants || []);
+  } catch (error: any) {
+    // console.error("Fetch Restaurants Error:", {
+    //   message: error.message,
+    //   status: error.response?.status,
+    //   data: error.response?.data,
+    // });
+    setError("Failed to load restaurants. Please try again.");
+  }
+};
+
+  const createRestaurant = async () => {
+    const { location, picture, name, information, phoneNumber } =
+      restaurantData;
+    if (!location || !picture || !name || !information || !phoneNumber) {
+      alert("Please provide all required restaurant information");
+      return;
+    }
+    try {
+      const response = await axios.post("http://localhost:5000/restaurant", {
+        location,
+        picture,
+        name,
+        information,
+        phoneNumber: Number(phoneNumber),
+      });
+      alert(response.data.message);
+      setRestaurantData({
+        location: "",
+        picture: "",
+        name: "",
+        information: "",
+        phoneNumber: "",
+      });
+      fetchRestaurants();
+    } catch (error: any) {
+      // console.error("Create Restaurant Error:", {
+      //   message: error.message,
+      //   status: error.response?.status,
+      //   data: error.response?.data,
+      // });
+      alert(
+        "Failed to create restaurant: " +
+          (error.response?.data?.message || error.message)
+      );
+    }
+  };
+
   const createNotification = async () => {
     if (!notifMessage.trim()) {
       alert("Please enter a notification message");
       return;
     }
-
     try {
       const response = await axios.post("http://localhost:5000/notif", {
         notif: notifMessage,
       });
       alert(response.data.message);
       setNotifMessage("");
-      fetchNotifications(); // Refresh notifications
+      fetchNotifications();
     } catch (error) {
       console.error("Error creating notification:", error);
       alert("Failed to create notification");
     }
   };
 
+
   const deleteNotification = async (id: string) => {
     try {
       const response = await axios.delete(`http://localhost:5000/notif/${id}`);
       alert(response.data.message);
-      fetchNotifications(); // Refresh notifications after deletion
+      fetchNotifications();
     } catch (error) {
       console.error("Error deleting notification:", error);
       alert("Failed to delete notification");
     }
+  };
+
+  const handleRestaurantInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setRestaurantData((prev) => ({ ...prev, [name]: value }));
   };
 
   const closeUsersList = () => {
@@ -159,6 +239,13 @@ export default function Dashboard() {
             fetchNotifications();
           }}
         />
+        <MapPin
+          className="h-6 w-6 hover:text-orange-300 cursor-pointer transition-colors"
+          onClick={() => {
+            setIsRestaurantModalOpen(true);
+            fetchRestaurants();
+          }}
+        />
       </aside>
 
       {/* Main Content */}
@@ -182,7 +269,8 @@ export default function Dashboard() {
               Admin <span className="text-orange-500">Dashboard</span>
             </h1>
             <p className="text-gray-300 text-lg max-w-md mx-auto">
-              Manage foods and orders efficiently from your admin panel.
+              Manage foods, orders, and restaurants efficiently from your admin
+              panel.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <button
@@ -251,7 +339,6 @@ export default function Dashboard() {
                   </li>
                 ))}
               </ul>
-
               {pagination && (
                 <div className="mt-6 flex flex-col items-center space-y-2">
                   <div className="flex space-x-2">
@@ -283,7 +370,7 @@ export default function Dashboard() {
         </aside>
       )}
 
-      {/* Notification Creation Modal */}
+      {/* Notification Modal */}
       {isNotifModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20">
           <div className="bg-gray-800/90 backdrop-blur-lg p-6 rounded-xl shadow-lg w-full max-w-md transform transition-all duration-300 scale-100 hover:scale-105">
@@ -313,8 +400,6 @@ export default function Dashboard() {
                 Send
               </button>
             </div>
-
-            {/* All Notifications List */}
             <div className="mt-6">
               <h3 className="text-lg font-semibold text-orange-400 mb-2">
                 All Notifications ({notifications.length})
@@ -340,6 +425,120 @@ export default function Dashboard() {
                       >
                         Delete
                       </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Restaurant Modal */}
+      {isRestaurantModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20">
+          <div className="bg-gray-800/90 backdrop-blur-lg p-6 rounded-xl shadow-lg w-full max-w-md transform transition-all duration-300 scale-100 hover:scale-105">
+            <h2 className="text-2xl font-semibold text-orange-400 mb-4">
+              Add Restaurant
+            </h2>
+            <input
+              type="text"
+              name="name"
+              value={restaurantData.name}
+              onChange={handleRestaurantInputChange}
+              placeholder="Restaurant Name"
+              className="w-full p-3 mb-4 bg-gray-700/50 text-white placeholder-gray-400 rounded-lg border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
+            />
+            <input
+              type="text"
+              name="location"
+              value={restaurantData.location}
+              onChange={handleRestaurantInputChange}
+              placeholder="Location"
+              className="w-full p-3 mb-4 bg-gray-700/50 text-white placeholder-gray-400 rounded-lg border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
+            />
+            <input
+              type="text"
+              name="picture"
+              value={restaurantData.picture}
+              onChange={handleRestaurantInputChange}
+              placeholder="Picture URL"
+              className="w-full p-3 mb-4 bg-gray-700/50 text-white placeholder-gray-400 rounded-lg border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
+            />
+            <textarea
+              name="information"
+              value={restaurantData.information}
+              onChange={handleRestaurantInputChange}
+              placeholder="Information"
+              className="w-full h-20 p-3 mb-4 bg-gray-700/50 text-white placeholder-gray-400 rounded-lg border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 resize-none transition-all duration-300"
+            />
+            <input
+              type="number"
+              name="phoneNumber"
+              value={restaurantData.phoneNumber}
+              onChange={handleRestaurantInputChange}
+              placeholder="Phone Number"
+              className="w-full p-3 mb-4 bg-gray-700/50 text-white placeholder-gray-400 rounded-lg border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
+            />
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setIsRestaurantModalOpen(false);
+                  setRestaurantData({
+                    location: "",
+                    picture: "",
+                    name: "",
+                    information: "",
+                    phoneNumber: "",
+                  });
+                }}
+                className="px-4 py-2 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-all duration-300 shadow-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createRestaurant}
+                className="px-4 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-all duration-300 shadow-md hover:shadow-orange-500/30"
+              >
+                Add
+              </button>
+            </div>
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-orange-400 mb-2">
+                All Restaurants ({restaurants.length})
+              </h3>
+              {restaurants.length === 0 ? (
+                <p className="text-gray-400">No restaurants yet</p>
+              ) : (
+                <div className="max-h-40 overflow-y-auto space-y-3">
+                  {restaurants.map((restaurant) => (
+                    <div
+                      key={restaurant._id}
+                      className="p-3 bg-gray-700/50 rounded-lg"
+                    >
+                      <p className="text-gray-200 text-sm font-semibold">
+                        {restaurant.name}
+                      </p>
+                      <p className="text-gray-200 text-sm">
+                        {restaurant.location}
+                      </p>
+                      <p className="text-gray-200 text-sm">
+                        {restaurant.information}
+                      </p>
+                      <p className="text-gray-200 text-sm">
+                        Phone: {restaurant.phoneNumber}
+                      </p>
+                      <img
+                        src={restaurant.picture}
+                        alt={restaurant.name}
+                        className="w-16 h-16 object-cover rounded-md mt-2"
+                        onError={(e) =>
+                          (e.currentTarget.src = "/fallback-image.jpg")
+                        }
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(restaurant.createdAt).toLocaleString()}
+                      </p>
                     </div>
                   ))}
                 </div>
