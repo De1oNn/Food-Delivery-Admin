@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { Bell } from "lucide-react";
 
 interface User {
   _id: string;
@@ -23,6 +24,12 @@ interface Pagination {
   limit: number;
 }
 
+interface Notification {
+  _id: string;
+  message: string;
+  createdAt: string;
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -31,6 +38,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showUsers, setShowUsers] = useState<boolean>(false);
+  const [isNotifModalOpen, setIsNotifModalOpen] = useState<boolean>(false);
+  const [notifMessage, setNotifMessage] = useState<string>("");
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -54,7 +64,6 @@ export default function Dashboard() {
   const fetchAllUsers = async (page: number = 1) => {
     setLoading(true);
     setError(null);
-
     try {
       const url = `http://localhost:5000/auth/users?page=${page}&limit=10`;
       const response = await axios.get(url);
@@ -62,12 +71,56 @@ export default function Dashboard() {
       setPagination(response.data.pagination);
       setShowUsers(true);
     } catch (err: any) {
-      console.error("Fetch all users error:", err.response?.data || err.message);
+      console.error(
+        "Fetch all users error:",
+        err.response?.data || err.message
+      );
       setError(err.response?.data?.message || "Failed to fetch users.");
       setAllUsers([]);
       setPagination(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get<{ notifications: Notification[] }>(
+        "http://localhost:5000/notif"
+      );
+      setNotifications(res.data.notifications || []);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const createNotification = async () => {
+    if (!notifMessage.trim()) {
+      alert("Please enter a notification message");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:5000/notif", {
+        notif: notifMessage,
+      });
+      alert(response.data.message);
+      setNotifMessage("");
+      fetchNotifications(); // Refresh notifications
+    } catch (error) {
+      console.error("Error creating notification:", error);
+      alert("Failed to create notification");
+    }
+  };
+
+  const deleteNotification = async (id: string) => {
+    try {
+      const response = await axios.delete(`http://localhost:5000/notif/${id}`);
+      alert(response.data.message);
+      fetchNotifications(); // Refresh notifications after deletion
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      alert("Failed to delete notification");
     }
   };
 
@@ -99,6 +152,13 @@ export default function Dashboard() {
             {user?.name?.[0] || "U"}
           </span>
         </div>
+        <Bell
+          className="h-6 w-6 hover:text-orange-300 cursor-pointer transition-colors"
+          onClick={() => {
+            setIsNotifModalOpen(true);
+            fetchNotifications();
+          }}
+        />
       </aside>
 
       {/* Main Content */}
@@ -175,7 +235,8 @@ export default function Dashboard() {
                       <strong>Role:</strong> {user.role}
                     </p>
                     <p>
-                      <strong>Verified:</strong> {user.isVerified ? "Yes" : "No"}
+                      <strong>Verified:</strong>{" "}
+                      {user.isVerified ? "Yes" : "No"}
                     </p>
                     {user.phoneNumber && (
                       <p>
@@ -191,7 +252,6 @@ export default function Dashboard() {
                 ))}
               </ul>
 
-              {/* Pagination */}
               {pagination && (
                 <div className="mt-6 flex flex-col items-center space-y-2">
                   <div className="flex space-x-2">
@@ -204,7 +264,9 @@ export default function Dashboard() {
                     </button>
                     <button
                       onClick={() => goToPage(pagination.currentPage + 1)}
-                      disabled={pagination.currentPage === pagination.totalPages}
+                      disabled={
+                        pagination.currentPage === pagination.totalPages
+                      }
                       className="px-3 py-1 bg-orange-500 text-white rounded-full disabled:bg-gray-600 hover:bg-orange-600 transition-all duration-300"
                     >
                       Next
@@ -219,6 +281,72 @@ export default function Dashboard() {
             </>
           )}
         </aside>
+      )}
+
+      {/* Notification Creation Modal */}
+      {isNotifModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20">
+          <div className="bg-gray-800/90 backdrop-blur-lg p-6 rounded-xl shadow-lg w-full max-w-md transform transition-all duration-300 scale-100 hover:scale-105">
+            <h2 className="text-2xl font-semibold text-orange-400 mb-4">
+              Create Notification
+            </h2>
+            <textarea
+              value={notifMessage}
+              onChange={(e) => setNotifMessage(e.target.value)}
+              placeholder="Enter your notification message..."
+              className="w-full h-32 p-3 bg-gray-700/50 text-white placeholder-gray-400 rounded-lg border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 resize-none transition-all duration-300"
+            />
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setIsNotifModalOpen(false);
+                  setNotifMessage("");
+                }}
+                className="px-4 py-2 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-all duration-300 shadow-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createNotification}
+                className="px-4 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-all duration-300 shadow-md hover:shadow-orange-500/30"
+              >
+                Send
+              </button>
+            </div>
+
+            {/* All Notifications List */}
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-orange-400 mb-2">
+                All Notifications ({notifications.length})
+              </h3>
+              {notifications.length === 0 ? (
+                <p className="text-gray-400">No notifications yet</p>
+              ) : (
+                <div className="max-h-40 overflow-y-auto space-y-3">
+                  {notifications.map((notif) => (
+                    <div
+                      key={notif._id}
+                      className="p-3 bg-gray-700/50 rounded-lg flex justify-between items-center"
+                    >
+                      <div>
+                        <p className="text-gray-200 text-sm">{notif.message}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(notif.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => deleteNotification(notif._id)}
+                        className="px-3 py-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-300 text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
