@@ -51,8 +51,7 @@ export default function Dashboard() {
   const [isNotifModalOpen, setIsNotifModalOpen] = useState<boolean>(false);
   const [notifMessage, setNotifMessage] = useState<string>("");
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isRestaurantModalOpen, setIsRestaurantModalOpen] =
-    useState<boolean>(false);
+  const [isRestaurantModalOpen, setIsRestaurantModalOpen] = useState<boolean>(false);
   const [restaurantData, setRestaurantData] = useState({
     location: "",
     picture: "",
@@ -61,7 +60,10 @@ export default function Dashboard() {
     phoneNumber: "",
   });
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [restaurantLoading, setRestaurantLoading] = useState<boolean>(false);
+  const [restaurantError, setRestaurantError] = useState<string | null>(null);
 
+  // Fetch user data on mount
   useEffect(() => {
     const fetchUserData = async () => {
       const storedUser = localStorage.getItem("user");
@@ -77,24 +79,27 @@ export default function Dashboard() {
         router.push("/login");
       }
     };
-
     fetchUserData();
   }, [router]);
 
+  // Fetch restaurants when modal opens
+  useEffect(() => {
+    if (isRestaurantModalOpen) {
+      fetchRestaurants();
+    }
+  }, [isRestaurantModalOpen]);
+
+  // Fetch all users with pagination
   const fetchAllUsers = async (page: number = 1) => {
     setLoading(true);
     setError(null);
     try {
-      const url = `http://localhost:5000/auth/users?page=${page}&limit=10`;
-      const response = await axios.get(url);
-      setAllUsers(response.data.users);
-      setPagination(response.data.pagination);
+      const response = await axios.get(`http://localhost:5000/auth/users?page=${page}&limit=10`);
+      setAllUsers(response.data.users || []);
+      setPagination(response.data.pagination || null);
       setShowUsers(true);
     } catch (err: any) {
-      console.error(
-        "Fetch all users error:",
-        err.response?.data || err.message
-      );
+      console.error("Fetch all users error:", err.response?.data || err.message);
       setError(err.response?.data?.message || "Failed to fetch users.");
       setAllUsers([]);
       setPagination(null);
@@ -103,36 +108,34 @@ export default function Dashboard() {
     }
   };
 
+  // Fetch notifications
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get<{ notifications: Notification[] }>(
-        "http://localhost:5000/notif"
-      );
+      const res = await axios.get<{ notifications: Notification[] }>("http://localhost:5000/notif");
       setNotifications(res.data.notifications || []);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   };
 
-const fetchRestaurants = async () => {
-  try {
-    const res = await axios.get<{ restaurants: Restaurant[] }>(
-      "http://localhost:5000/restaurant"
-    );
-    setRestaurants(res.data.restaurants || []);
-  } catch (error: any) {
-    // console.error("Fetch Restaurants Error:", {
-    //   message: error.message,
-    //   status: error.response?.status,
-    //   data: error.response?.data,
-    // });
-    setError("Failed to load restaurants. Please try again.");
-  }
-};
+  // Fetch restaurants
+  const fetchRestaurants = async () => {
+    setRestaurantLoading(true);
+    setRestaurantError(null);
+    try {
+      const res = await axios.get<{ restaurants: Restaurant[] }>("http://localhost:5000/restaurant");
+      setRestaurants(res.data.restaurants || []);
+    } catch (error: any) {
+      console.error("Fetch Restaurants Error:", error);
+      setRestaurantError(error.response?.data?.message || "Failed to load restaurants.");
+    } finally {
+      setRestaurantLoading(false);
+    }
+  };
 
+  // Create a new restaurant
   const createRestaurant = async () => {
-    const { location, picture, name, information, phoneNumber } =
-      restaurantData;
+    const { location, picture, name, information, phoneNumber } = restaurantData;
     if (!location || !picture || !name || !information || !phoneNumber) {
       alert("Please provide all required restaurant information");
       return;
@@ -145,38 +148,24 @@ const fetchRestaurants = async () => {
         information,
         phoneNumber: Number(phoneNumber),
       });
-      alert(response.data.message);
-      setRestaurantData({
-        location: "",
-        picture: "",
-        name: "",
-        information: "",
-        phoneNumber: "",
-      });
+      alert(response.data.message || "Restaurant created successfully");
+      setRestaurantData({ location: "", picture: "", name: "", information: "", phoneNumber: "" });
       fetchRestaurants();
     } catch (error: any) {
-      // console.error("Create Restaurant Error:", {
-      //   message: error.message,
-      //   status: error.response?.status,
-      //   data: error.response?.data,
-      // });
-      alert(
-        "Failed to create restaurant: " +
-          (error.response?.data?.message || error.message)
-      );
+      console.error("Create Restaurant Error:", error);
+      alert(error.response?.data?.message || "Failed to create restaurant");
     }
   };
 
+  // Create a new notification
   const createNotification = async () => {
     if (!notifMessage.trim()) {
       alert("Please enter a notification message");
       return;
     }
     try {
-      const response = await axios.post("http://localhost:5000/notif", {
-        notif: notifMessage,
-      });
-      alert(response.data.message);
+      const response = await axios.post("http://localhost:5000/notif", { notif: notifMessage });
+      alert(response.data.message || "Notification sent");
       setNotifMessage("");
       fetchNotifications();
     } catch (error) {
@@ -185,11 +174,11 @@ const fetchRestaurants = async () => {
     }
   };
 
-
+  // Delete a notification
   const deleteNotification = async (id: string) => {
     try {
       const response = await axios.delete(`http://localhost:5000/notif/${id}`);
-      alert(response.data.message);
+      alert(response.data.message || "Notification deleted");
       fetchNotifications();
     } catch (error) {
       console.error("Error deleting notification:", error);
@@ -197,6 +186,7 @@ const fetchRestaurants = async () => {
     }
   };
 
+  // Handle restaurant form input changes
   const handleRestaurantInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -204,18 +194,21 @@ const fetchRestaurants = async () => {
     setRestaurantData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Close the users list sidebar
   const closeUsersList = () => {
     setShowUsers(false);
     setAllUsers([]);
     setPagination(null);
   };
 
+  // Navigate to a specific page of users
   const goToPage = (page: number) => {
     if (page >= 1 && page <= (pagination?.totalPages || 1)) {
       fetchAllUsers(page);
     }
   };
 
+  // Navigation functions
   const food = () => router.push("/food");
   const order = () => router.push("/order");
   const profile = () => router.push("/dashboard/profile");
@@ -241,10 +234,7 @@ const fetchRestaurants = async () => {
         />
         <MapPin
           className="h-6 w-6 hover:text-orange-300 cursor-pointer transition-colors"
-          onClick={() => {
-            setIsRestaurantModalOpen(true);
-            fetchRestaurants();
-          }}
+          onClick={() => setIsRestaurantModalOpen(true)}
         />
       </aside>
 
@@ -269,8 +259,7 @@ const fetchRestaurants = async () => {
               Admin <span className="text-orange-500">Dashboard</span>
             </h1>
             <p className="text-gray-300 text-lg max-w-md mx-auto">
-              Manage foods, orders, and restaurants efficiently from your admin
-              panel.
+              Manage foods, orders, and restaurants efficiently from your admin panel.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <button
@@ -313,28 +302,13 @@ const fetchRestaurants = async () => {
                     key={user._id}
                     className="p-4 bg-gray-700/50 rounded-lg flex flex-col space-y-2 text-sm"
                   >
-                    <p>
-                      <strong>Name:</strong> {user.name || "N/A"}
-                    </p>
-                    <p>
-                      <strong>Email:</strong> {user.email}
-                    </p>
-                    <p>
-                      <strong>Role:</strong> {user.role}
-                    </p>
-                    <p>
-                      <strong>Verified:</strong>{" "}
-                      {user.isVerified ? "Yes" : "No"}
-                    </p>
-                    {user.phoneNumber && (
-                      <p>
-                        <strong>Phone:</strong> {user.phoneNumber}
-                      </p>
-                    )}
+                    <p><strong>Name:</strong> {user.name || "N/A"}</p>
+                    <p><strong>Email:</strong> {user.email}</p>
+                    <p><strong>Role:</strong> {user.role}</p>
+                    <p><strong>Verified:</strong> {user.isVerified ? "Yes" : "No"}</p>
+                    {user.phoneNumber && <p><strong>Phone:</strong> {user.phoneNumber}</p>}
                     {user.orderedFoods.length > 0 && (
-                      <p>
-                        <strong>Orders:</strong> {user.orderedFoods.join(", ")}
-                      </p>
+                      <p><strong>Orders:</strong> {user.orderedFoods.join(", ")}</p>
                     )}
                   </li>
                 ))}
@@ -351,17 +325,14 @@ const fetchRestaurants = async () => {
                     </button>
                     <button
                       onClick={() => goToPage(pagination.currentPage + 1)}
-                      disabled={
-                        pagination.currentPage === pagination.totalPages
-                      }
+                      disabled={pagination.currentPage === pagination.totalPages}
                       className="px-3 py-1 bg-orange-500 text-white rounded-full disabled:bg-gray-600 hover:bg-orange-600 transition-all duration-300"
                     >
                       Next
                     </button>
                   </div>
                   <span className="text-sm text-gray-300">
-                    Page {pagination.currentPage} of {pagination.totalPages} (
-                    {pagination.totalUsers} users)
+                    Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalUsers} users)
                   </span>
                 </div>
               )}
@@ -374,9 +345,7 @@ const fetchRestaurants = async () => {
       {isNotifModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20">
           <div className="bg-gray-800/90 backdrop-blur-lg p-6 rounded-xl shadow-lg w-full max-w-md transform transition-all duration-300 scale-100 hover:scale-105">
-            <h2 className="text-2xl font-semibold text-orange-400 mb-4">
-              Create Notification
-            </h2>
+            <h2 className="text-2xl font-semibold text-orange-400 mb-4">Create Notification</h2>
             <textarea
               value={notifMessage}
               onChange={(e) => setNotifMessage(e.target.value)}
@@ -438,9 +407,7 @@ const fetchRestaurants = async () => {
       {isRestaurantModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20">
           <div className="bg-gray-800/90 backdrop-blur-lg p-6 rounded-xl shadow-lg w-full max-w-md transform transition-all duration-300 scale-100 hover:scale-105">
-            <h2 className="text-2xl font-semibold text-orange-400 mb-4">
-              Add Restaurant
-            </h2>
+            <h2 className="text-2xl font-semibold text-orange-400 mb-4">Add Restaurant</h2>
             <input
               type="text"
               name="name"
@@ -507,41 +474,32 @@ const fetchRestaurants = async () => {
               <h3 className="text-lg font-semibold text-orange-400 mb-2">
                 All Restaurants ({restaurants.length})
               </h3>
-              {restaurants.length === 0 ? (
+              {restaurantLoading && <p className="text-gray-400">Loading restaurants...</p>}
+              {restaurantError && <p className="text-red-500">{restaurantError}</p>}
+              {!restaurantLoading && !restaurantError && restaurants.length === 0 ? (
                 <p className="text-gray-400">No restaurants yet</p>
               ) : (
-                <div className="max-h-40 overflow-y-auto space-y-3">
-                  {restaurants.map((restaurant) => (
-                    <div
-                      key={restaurant._id}
-                      className="p-3 bg-gray-700/50 rounded-lg"
-                    >
-                      <p className="text-gray-200 text-sm font-semibold">
-                        {restaurant.name}
-                      </p>
-                      <p className="text-gray-200 text-sm">
-                        {restaurant.location}
-                      </p>
-                      <p className="text-gray-200 text-sm">
-                        {restaurant.information}
-                      </p>
-                      <p className="text-gray-200 text-sm">
-                        Phone: {restaurant.phoneNumber}
-                      </p>
-                      <img
-                        src={restaurant.picture}
-                        alt={restaurant.name}
-                        className="w-16 h-16 object-cover rounded-md mt-2"
-                        onError={(e) =>
-                          (e.currentTarget.src = "/fallback-image.jpg")
-                        }
-                      />
-                      <p className="text-xs text-gray-400 mt-1">
-                        {new Date(restaurant.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                !restaurantLoading && !restaurantError && (
+                  <div className="max-h-40 overflow-y-auto space-y-3">
+                    {restaurants.map((restaurant) => (
+                      <div key={restaurant._id} className="p-3 bg-gray-700/50 rounded-lg">
+                        <p className="text-gray-200 text-sm font-semibold">{restaurant.name}</p>
+                        <p className="text-gray-200 text-sm">{restaurant.location}</p>
+                        <p className="text-gray-200 text-sm">{restaurant.information}</p>
+                        <p className="text-gray-200 text-sm">Phone: {restaurant.phoneNumber}</p>
+                        <img
+                          src={restaurant.picture}
+                          alt={restaurant.name}
+                          className="w-16 h-16 object-cover rounded-md mt-2"
+                          onError={(e) => (e.currentTarget.src = "/fallback-image.jpg")}
+                        />
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(restaurant.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )
               )}
             </div>
           </div>
