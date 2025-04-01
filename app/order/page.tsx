@@ -220,7 +220,7 @@ export default function Order() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map((order) => (
+                    {orders.map((order) => (
                     <tr
                       key={order._id}
                       className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors duration-200"
