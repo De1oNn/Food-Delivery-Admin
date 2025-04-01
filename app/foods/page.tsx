@@ -3,20 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-interface FoodItem {
-  _id: string;
-  foodName: string;
-  price: number;
-  image: string;
-  ingredients: string;
-  category: { _id: string; categoryName: string } | null;
-}
-
-interface CategoryItem {
-  _id: string;
-  categoryName: string;
-}
-
 export default function Foods() {
   const router = useRouter();
   const [foods, setFoods] = useState<FoodItem[]>([]);
@@ -89,8 +75,6 @@ export default function Foods() {
     );
     return acc;
   }, {} as Record<string, FoodItem[]>);
-
-  const uncategorizedFoods = foods.filter((food) => !food.category);
 
   const back = () => router.push("/food");
 
@@ -185,45 +169,6 @@ export default function Foods() {
                 )}
               </div>
             ))}
-
-            {uncategorizedFoods.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-semibold text-teal-400 mb-6">
-                  Uncategorized Foods
-                </h2>
-                <div className="flex flex-wrap gap-6">
-                  {uncategorizedFoods.map((food) => (
-                    <div
-                      key={food._id}
-                      className="bg-gray-800/50 backdrop-blur-md p-4 rounded-xl shadow-lg w-[calc(50%-1.5rem)] hover:shadow-teal-500/20 transition-all duration-300"
-                    >
-                      <div className="flex items-center">
-                        <img
-                          src={food.image}
-                          alt={food.foodName}
-                          className="w-16 h-16 object-cover rounded-lg mr-4"
-                          onError={handleImageError(food._id)}
-                        />
-                        <div>
-                          <p className="text-lg font-medium text-white">
-                            {food.foodName}
-                          </p>
-                          <p className="text-sm text-gray-300">
-                            ${food.price.toFixed(2)}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            Ingredients: {food.ingredients || "None"}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            Category: None
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>

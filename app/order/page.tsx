@@ -4,23 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-interface FoodOrderItem {
-  food: {
-    foodName: string;
-    price: number;
-    image: string;
-  } | null;
-  quantity: number;
-}
-
-interface Order {
-  _id: string;
-  user: { name: string };
-  email?: string;
-  foodOrderItems: FoodOrderItem[];
-  createdAt: string;
-  status: "PENDING" | "CANCELED" | "DELIVERED";
-}
 
 export default function Order() {
   const [orders, setOrders] = useState<Order[]>([]);

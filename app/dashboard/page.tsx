@@ -5,41 +5,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Bell, MapPin } from "lucide-react";
 
-interface User {
-  _id: string;
-  email: string;
-  name: string;
-  phoneNumber?: string;
-  address?: string;
-  role: "ADMIN" | "USER";
-  orderedFoods: string[];
-  isVerified: boolean;
-  createdAt?: string;
-}
-
-interface Pagination {
-  currentPage: number;
-  totalPages: number;
-  totalUsers: number;
-  limit: number;
-}
-
-interface Notification {
-  _id: string;
-  message: string;
-  createdAt: string;
-}
-
-interface Restaurant {
-  _id: string;
-  location: string;
-  picture: string;
-  name: string;
-  information: string;
-  phoneNumber: number;
-  createdAt: string;
-}
-
 export default function Dashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);

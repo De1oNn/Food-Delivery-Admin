@@ -3,32 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-interface FoodFormData {
-  foodName: string;
-  price: string;
-  image: string;
-  ingredients: string;
-  category: string;
-}
-
-interface CategoryFormData {
-  categoryName: string;
-}
-
-interface FoodItem {
-  _id: string;
-  foodName: string;
-  price: number;
-  image: string;
-  ingredients: string;
-  category: { _id: string; categoryName: string } | null;
-}
-
-interface CategoryItem {
-  _id: string;
-  categoryName: string;
-}
-
 export default function Food() {
   const router = useRouter();
   const [foodFormData, setFoodFormData] = useState<FoodFormData>({
