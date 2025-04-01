@@ -30,51 +30,52 @@ export default function Order() {
   const [usernameFilter, setUsernameFilter] = useState<string>("");
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setError("");
-        setIsLoading(true);
+  const fetchOrders = async () => {
+    try {
+      setError("");
+      setIsLoading(true);
 
-        const token = localStorage.getItem("token");
-        if (!token) {
-          router.push("/login");
-          return;
-        }
-
-        const url = usernameFilter
-          ? `http://localhost:5000/order?username=${encodeURIComponent(
-              usernameFilter
-            )}`
-          : "http://localhost:5000/order";
-
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const orderData = await response.json();
-
-        if (!response.ok) {
-          throw new Error(orderData.message || "Failed to fetch orders");
-        }
-
-        setOrders(orderData.orders || []);
-      } catch (err) {
-        console.error("Fetch error:", err);
-        setError(
-          `Failed to load orders: ${
-            err instanceof Error ? err.message : "Unknown error"
-          }`
-        );
-      } finally {
-        setIsLoading(false);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
       }
-    };
 
+      const url = usernameFilter
+        ? `http://localhost:5000/order?username=${encodeURIComponent(
+            usernameFilter
+          )}`
+        : "http://localhost:5000/order";
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const orderData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(orderData.message || "Failed to fetch orders");
+      }
+
+      console.log("Fetched orders:", orderData.orders);
+      setOrders(orderData.orders || []);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError(
+        `Failed to load orders: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchOrders();
   }, [usernameFilter, router]);
 
@@ -112,6 +113,40 @@ export default function Order() {
           err instanceof Error ? err.message : "Unknown error"
         }`
       );
+    }
+  };
+
+  const deleteOrder = async (orderId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Please login first");
+      setError("");
+      const response = await fetch(`http://localhost:5000/order/${orderId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+      if (!response.ok && response.status !== 404) {
+        throw new Error(result.message || "Failed to delete order");
+      }
+
+      await fetchOrders();
+      // alert(
+      //   response.status === 404
+      //     ? "Order already deleted"
+      //     : "Order deleted successfully"
+      // );
+    } catch (err) {
+      console.error("Delete order error:", err);
+      // setError(
+      //   `Failed to delete order: ${
+      //     err instanceof Error ? err.message : "Unknown error"
+      //   }`
+      // );
     }
   };
 
@@ -198,6 +233,7 @@ export default function Order() {
                     <th className="p-4 font-semibold">Total</th>
                     <th className="p-4 font-semibold">Date</th>
                     <th className="p-4 font-semibold">Status</th>
+                    <th className="p-4 font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -279,6 +315,14 @@ export default function Order() {
                             </option>
                           ))}
                         </select>
+                      </td>
+                      <td className="p-4">
+                        <button
+                          onClick={() => deleteOrder(order._id)}
+                          className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
