@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-
 export default function Order() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -40,10 +39,6 @@ export default function Order() {
 
       const orderData = await response.json();
 
-      if (!response.ok) {
-        throw new Error(orderData.message || "Failed to fetch orders");
-      }
-
       console.log("Fetched orders:", orderData.orders);
       setOrders(orderData.orders || []);
     } catch (err) {
@@ -78,9 +73,6 @@ export default function Order() {
       });
 
       const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to update status");
-      }
 
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
@@ -97,12 +89,12 @@ export default function Order() {
         }`
       );
     }
+    console.log("hello from update status");
   };
 
   const deleteOrder = async (orderId: string) => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("Please login first");
       setError("");
       const response = await fetch(`http://localhost:5000/order/${orderId}`, {
         method: "DELETE",
@@ -111,25 +103,18 @@ export default function Order() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       const result = await response.json();
-      if (!response.ok && response.status !== 404) {
-        throw new Error(result.message || "Failed to delete order");
-      }
-
       await fetchOrders();
-      // alert(
-      //   response.status === 404
-      //     ? "Order already deleted"
-      //     : "Order deleted successfully"
-      // );
+      alert("Order deleted successfully");
     } catch (err) {
       console.error("Delete order error:", err);
-      // setError(
-      //   `Failed to delete order: ${
-      //     err instanceof Error ? err.message : "Unknown error"
-      //   }`
-      // );
+      setError(
+        `Failed to delete order: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`
+      );
+      console.log("hello delete order");
+    } finally {
     }
   };
 
@@ -148,9 +133,9 @@ export default function Order() {
       }, 0)
       .toFixed(2);
 
-  const handleUsernameFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUsernameFilter(e.target.value);
-  };
+const handleUsernameFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setUsernameFilter(e.target.value);
+};
 
   const statusOptions: Order["status"][] = ["PENDING", "CANCELED", "DELIVERED"];
 
@@ -220,7 +205,7 @@ export default function Order() {
                   </tr>
                 </thead>
                 <tbody>
-                    {orders.map((order) => (
+                  {orders.map((order) => (
                     <tr
                       key={order._id}
                       className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors duration-200"

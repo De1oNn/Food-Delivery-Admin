@@ -13,37 +13,32 @@ export default function Login() {
   const [leftImageIndex, setLeftImageIndex] = useState(0);
   const [rightImageIndex, setRightImageIndex] = useState(0);
 
-  // Left half background images
   const leftBackgroundImages = [
     "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=3571&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Zm9vZHxlbnwwfHwwfHx8MA%3D%3D",
     "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGZvb2R8ZW58MHx8MHx8fDA%3D",
   ];
-
-  // Right half background images
   const rightBackgroundImages = [
     "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGZvb2R8ZW58MHx8MHx8fDA%3D",
     "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGZvb2R8ZW58MHx8MHx8fDA%3D",
     "https://images.unsplash.com/photo-1624726175512-19b9baf9fbd1?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Zm9vZHN8ZW58MHx8MHx8fDA%3D",
   ];
 
-  // Auto-swipe for left half
   useEffect(() => {
     const interval = setInterval(() => {
       setLeftImageIndex(
         (prevIndex) => (prevIndex + 1) % leftBackgroundImages.length
       );
-    }, 5000); // 2 seconds
+    }, 5000); 
     return () => clearInterval(interval);
   }, [leftBackgroundImages.length]);
 
-  // Auto-swipe for right half
   useEffect(() => {
     const interval = setInterval(() => {
       setRightImageIndex(
         (prevIndex) => (prevIndex + 1) % rightBackgroundImages.length
       );
-    }, 5000); // 2 seconds
+    }, 5000); 
     return () => clearInterval(interval);
   }, [rightBackgroundImages.length]);
 
@@ -69,9 +64,14 @@ export default function Login() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         setMessage("Login successful!");
-        setTimeout(() => {
+          // router.push(`/dashboard`);
           router.push(`/dashboard?userId=${data.user._id}`);
-        }, 1000);
+
+        // setTimeout(() => {
+        //   console.log(data.user._id);
+          
+        //   router.push(`/dashboard?userId=${data.user._id}`);
+        // }, 1000);
       } else {
         setError(data.message || "Login failed");
       }
@@ -83,9 +83,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-      {/* Left Half: Form with Slideshow Background */}
       <div className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
-        {/* Left Slideshow */}
         <div className="absolute inset-0">
           {leftBackgroundImages.map((src, index) => (
             <Image
@@ -100,7 +98,6 @@ export default function Login() {
             />
           ))}
         </div>
-        {/* Form Card */}
         <div className="relative z-10 max-w-md w-full bg-gray-800/50 backdrop-blur-lg p-8 rounded-xl shadow-lg border border-gray-700/50">
           <button 
           className="h-[20px] w-[20px] bg-[gray] flex justify-center items-center rounded-4xl"
@@ -152,9 +149,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right Half: Slideshow Background */}
       <div className="hidden md:flex flex-1 relative overflow-hidden">
-        {/* Right Slideshow */}
         <div className="absolute inset-0">
           {rightBackgroundImages.map((src, index) => (
             <Image

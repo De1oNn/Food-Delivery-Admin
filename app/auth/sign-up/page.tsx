@@ -16,37 +16,32 @@ export default function Signup() {
   const [leftImageIndex, setLeftImageIndex] = useState(0);
   const [rightImageIndex, setRightImageIndex] = useState(0);
 
-  // Left half background images (behind the form)
   const leftBackgroundImages = [
     "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80",
     "https://images.unsplash.com/photo-1504672281656-e3e7b0ae83ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80",
     "https://images.unsplash.com/photo-1565299624946-baccd305181c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80",
   ];
-
-  // Right half background images
   const rightBackgroundImages = [
     "https://images.unsplash.com/photo-1556911220-bff31c812dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80",
     "https://images.unsplash.com/photo-1511690656952-34372de2f617?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80",
     "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80",
   ];
 
-  // Auto-swipe for left half
   useEffect(() => {
     const interval = setInterval(() => {
       setLeftImageIndex(
         (prevIndex) => (prevIndex + 1) % leftBackgroundImages.length
       );
-    }, 2000); // 2 seconds
+    }, 2000); 
     return () => clearInterval(interval);
   }, [leftBackgroundImages.length]);
 
-  // Auto-swipe for right half
   useEffect(() => {
     const interval = setInterval(() => {
       setRightImageIndex(
         (prevIndex) => (prevIndex + 1) % rightBackgroundImages.length
       );
-    }, 2000); // 2 seconds
+    }, 2000); 
     return () => clearInterval(interval);
   }, [rightBackgroundImages.length]);
 
@@ -97,9 +92,7 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-      {/* Left Half: Form with Slideshow Background */}
       <div className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
-        {/* Left Slideshow */}
         <div className="absolute inset-0">
           {leftBackgroundImages.map((src, index) => (
             <Image
@@ -114,7 +107,6 @@ export default function Signup() {
             />
           ))}
         </div>
-        {/* Form Card */}
         <div className="relative z-10 max-w-md w-full bg-gray-800/50 backdrop-blur-lg p-8 rounded-xl shadow-lg border border-gray-700/50">
           <h1 className="text-4xl font-extrabold text-center text-orange-400 mb-6">
             Create Account
@@ -204,9 +196,7 @@ export default function Signup() {
         </div>
       </div>
 
-      {/* Right Half: Slideshow Background */}
       <div className="hidden md:flex flex-1 relative overflow-hidden">
-        {/* Right Slideshow */}
         <div className="absolute inset-0">
           {rightBackgroundImages.map((src, index) => (
             <Image
