@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { CldUploadButton } from "next-cloudinary";
 
 export default function Food() {
   const router = useRouter();
@@ -24,14 +25,16 @@ export default function Food() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const foodResponse = await fetch("http://localhost:5000/food");
+        const foodResponse = await fetch(
+          "https://food-delivery-back-end-three.vercel.app/food"
+        );
         const foodData = await foodResponse.json();
         if (!foodResponse.ok)
           throw new Error(foodData.message || "Failed to fetch foods");
         setFoods(foodData.foods || []);
 
         const categoryResponse = await fetch(
-          "http://localhost:5000/food-category"
+          "https://food-delivery-back-end-three.vercel.app/food-category"
         );
         const categoryData = await categoryResponse.json();
         if (!categoryResponse.ok)
@@ -66,11 +69,14 @@ export default function Food() {
         category: foodFormData.category,
       };
 
-      const response = await fetch("http://localhost:5000/food", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await fetch(
+        "https://food-delivery-back-end-three.vercel.app/food",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        }
+      );
 
       const data = await response.json();
 
@@ -106,11 +112,14 @@ export default function Food() {
     try {
       const requestBody = { categoryName: categoryFormData.categoryName };
 
-      const response = await fetch("http://localhost:5000/food-category", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await fetch(
+        "https://food-delivery-back-end-three.vercel.app/food-category",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        }
+      );
 
       const data = await response.json();
 
@@ -202,7 +211,6 @@ export default function Food() {
             </form>
             {categories.length > 0 && (
               <div className="flex flex-wrap gap-3 mb-6 mt-6 ">
-                
                 {categories.map((category) => (
                   <div
                     key={category._id}
@@ -221,7 +229,7 @@ export default function Food() {
           </div>
         </div>
 
-        {/* Create Food Section */}
+        {/* x Section */}
         <div className="bg-gray-800/50 backdrop-blur-md p-6 rounded-xl shadow-lg">
           <h2 className="text-2xl font-semibold text-orange-400 mb-6">
             Create Food
@@ -252,6 +260,7 @@ export default function Food() {
               className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
               required
             />
+            <CldUploadButton uploadPreset="ml_default" />
             <input
               type="text"
               value={foodFormData.ingredients}

@@ -16,7 +16,7 @@ export default function Foods() {
         setError("");
 
         const categoryResponse = await fetch(
-          "http://localhost:5000/food-category",
+          "https://food-delivery-back-end-three.vercel.app/food-category",
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
@@ -26,10 +26,13 @@ export default function Foods() {
         if (!categoryResponse.ok)
           throw new Error(categoryData.message || "Failed to fetch categories");
 
-        const foodResponse = await fetch("http://localhost:5000/food", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
+        const foodResponse = await fetch(
+          "https://food-delivery-back-end-three.vercel.app/food",
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
         const foodData = await foodResponse.json();
         if (!foodResponse.ok)
           throw new Error(foodData.message || "Failed to fetch foods");

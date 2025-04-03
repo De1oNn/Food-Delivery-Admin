@@ -24,10 +24,10 @@ export default function Order() {
       }
 
       const url = usernameFilter
-        ? `http://localhost:5000/order?username=${encodeURIComponent(
+        ? `https://food-delivery-back-end-three.vercel.app/order?username=${encodeURIComponent(
             usernameFilter
           )}`
-        : "http://localhost:5000/order";
+        : "https://food-delivery-back-end-three.vercel.app/order";
 
       const response = await fetch(url, {
         method: "GET",
@@ -63,14 +63,17 @@ export default function Order() {
       if (!token) throw new Error("Please login first");
 
       setError("");
-      const response = await fetch(`http://localhost:5000/order/${orderId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      const response = await fetch(
+        `https://food-delivery-back-end-three.vercel.app/order/${orderId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
 
       const result = await response.json();
 
@@ -96,13 +99,16 @@ export default function Order() {
     try {
       const token = localStorage.getItem("token");
       setError("");
-      const response = await fetch(`http://localhost:5000/order/${orderId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `https://food-delivery-back-end-three.vercel.app/order/${orderId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const result = await response.json();
       await fetchOrders();
       alert("Order deleted successfully");

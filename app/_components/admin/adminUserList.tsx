@@ -35,7 +35,7 @@ const AdminUserList = () => {
     setError(null);
     try {
       const response = await axios.get(
-        `http://localhost:5000/auth/users?page=${page}&limit=10`,
+        `https://food-delivery-back-end-three.vercel.app/auth/users?page=${page}&limit=10`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -72,7 +72,7 @@ const AdminUserList = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white flex">
-      <div className="flex-1  p-6">
+      <div className="flex-1 co p-6">
         <div className="flex justify-center mb-6">
           <button
             onClick={() => fetchAllUsers(1)}
