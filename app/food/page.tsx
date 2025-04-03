@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CldUploadButton } from "next-cloudinary";
+// import { CldUploadButton } from "next-cloudinary";
 
 export default function Food() {
   const router = useRouter();
@@ -260,7 +260,7 @@ export default function Food() {
               className="w-full px-4 py-3 bg-gray-700/70 text-white placeholder-gray-400 rounded-full border-2 border-gray-600 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all duration-300"
               required
             />
-            <CldUploadButton uploadPreset="ml_default" />
+            {/* <CldUploadButton uploadPreset="ml_default" /> */}
             <input
               type="text"
               value={foodFormData.ingredients}
