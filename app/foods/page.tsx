@@ -83,10 +83,6 @@ export default function Foods() {
 
   const handleImageError =
     (foodId: string) => (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-      console.error(
-        `Image failed to load for food ID ${foodId}: ${e.currentTarget.src}`
-      );
-      e.currentTarget.src = "/fallback-image.jpg"; // Use a fallback image
     };
 
   return (
