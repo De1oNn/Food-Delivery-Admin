@@ -26,20 +26,10 @@ export default function Foods() {
         if (!categoryResponse.ok)
           throw new Error(categoryData.message || "Failed to fetch categories");
 
-<<<<<<< HEAD
         const foodResponse = await fetch("https://food-delivery-back-end-three.vercel.app/food", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
-=======
-        const foodResponse = await fetch(
-          "https://food-delivery-back-end-three.vercel.app/food",
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
->>>>>>> 8507a1fd3a2e0c822a02f4a50d2a50c02e95ea54
         const foodData = await foodResponse.json();
         if (!foodResponse.ok)
           throw new Error(foodData.message || "Failed to fetch foods");
@@ -83,13 +73,9 @@ export default function Foods() {
 
   const back = () => router.push("/food");
 
-  const handleImageError =
-    (foodId: string) => (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    };
-
   const handleDelete = async (foodId: string) => {
     if (!confirm("Are you sure you want to delete this food item?")) return;
-
+  
     try {
       const response = await fetch(
         `https://food-delivery-back-end-three.vercel.app/food/${foodId}`,
@@ -98,10 +84,21 @@ export default function Foods() {
           headers: { "Content-Type": "application/json" },
         }
       );
-      const data = await response.json();
+  
+      const text = await response.text();
+      console.log("Raw response:", text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (jsonError) {
+        throw new Error(`Invalid JSON response: ${text}`);
+      }
+  
       if (!response.ok) {
         throw new Error(data.message || "Failed to delete food");
       }
+  
       setFoods((prevFoods) => prevFoods.filter((food) => food._id !== foodId));
       alert("Food deleted successfully!");
     } catch (err) {
@@ -168,7 +165,7 @@ export default function Foods() {
                               src={food.image}
                               alt={food.foodName}
                               className="w-16 h-16 object-cover rounded-lg mr-4"
-                              onError={handleImageError(food._id)}
+                              // onError={handleImageError(food._id)}
                             />
                             <div>
                               <p className="text-lg font-medium text-white">

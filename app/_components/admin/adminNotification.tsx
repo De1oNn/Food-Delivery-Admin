@@ -24,18 +24,9 @@ const AdminNotification = () => {
       return;
     }
     try {
-<<<<<<< HEAD
       const response = await axios.post("https://food-delivery-back-end-three.vercel.app/notif", {
         notif: notifMessage,
       });
-=======
-      const response = await axios.post(
-        "https://food-delivery-back-end-three.vercel.app/notif",
-        {
-          notif: notifMessage,
-        }
-      );
->>>>>>> 8507a1fd3a2e0c822a02f4a50d2a50c02e95ea54
       alert(response.data.message || "Notification sent");
       setNotifMessage("");
       fetchNotifications();
@@ -46,13 +37,7 @@ const AdminNotification = () => {
   };
   const deleteNotification = async (id: string) => {
     try {
-<<<<<<< HEAD
       const response = await axios.delete(`https://food-delivery-back-end-three.vercel.app/notif/${id}`);
-=======
-      const response = await axios.delete(
-        `https://food-delivery-back-end-three.vercel.app/notif/${id}`
-      );
->>>>>>> 8507a1fd3a2e0c822a02f4a50d2a50c02e95ea54
       alert(response.data.message || "Notification deleted");
       fetchNotifications();
     } catch (error) {
