@@ -24,14 +24,14 @@ export default function Food() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const foodResponse = await fetch("http://localhost:5000/food");
+        const foodResponse = await fetch("https://food-delivery-back-end-three.vercel.app/food");
         const foodData = await foodResponse.json();
         if (!foodResponse.ok)
           throw new Error(foodData.message || "Failed to fetch foods");
         setFoods(foodData.foods || []);
 
         const categoryResponse = await fetch(
-          "http://localhost:5000/food-category"
+          "https://food-delivery-back-end-three.vercel.app/food-category"
         );
         const categoryData = await categoryResponse.json();
         if (!categoryResponse.ok)
@@ -66,7 +66,7 @@ export default function Food() {
         category: foodFormData.category,
       };
 
-      const response = await fetch("http://localhost:5000/food", {
+      const response = await fetch("https://food-delivery-back-end-three.vercel.app/food", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
@@ -106,7 +106,7 @@ export default function Food() {
     try {
       const requestBody = { categoryName: categoryFormData.categoryName };
 
-      const response = await fetch("http://localhost:5000/food-category", {
+      const response = await fetch("https://lfood-delivery-back-end-three.vercel.app/food-category", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),

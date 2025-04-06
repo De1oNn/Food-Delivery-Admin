@@ -12,7 +12,7 @@ const AdminNotification = () => {
   const fetchNotifications = async () => {
     try {
       const res = await axios.get<{ notifications: Notification[] }>(
-        "http://localhost:5000/notif"
+        "https://food-delivery-back-end-three.vercel.app/notif"
       );
       setNotifications(res.data.notifications || []);
     } catch (error) {}
@@ -24,7 +24,7 @@ const AdminNotification = () => {
       return;
     }
     try {
-      const response = await axios.post("http://localhost:5000/notif", {
+      const response = await axios.post("https://food-delivery-back-end-three.vercel.app/notif", {
         notif: notifMessage,
       });
       alert(response.data.message || "Notification sent");
@@ -37,7 +37,7 @@ const AdminNotification = () => {
   };
   const deleteNotification = async (id: string) => {
     try {
-      const response = await axios.delete(`http://localhost:5000/notif/${id}`);
+      const response = await axios.delete(`https://food-delivery-back-end-three.vercel.app/notif/${id}`);
       alert(response.data.message || "Notification deleted");
       fetchNotifications();
     } catch (error) {

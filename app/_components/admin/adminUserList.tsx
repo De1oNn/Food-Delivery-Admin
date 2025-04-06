@@ -35,7 +35,7 @@ const AdminUserList = () => {
     setError(null);
     try {
       const response = await axios.get(
-        `http://localhost:5000/auth/users?page=${page}&limit=10`,
+        `https://food-delivery-back-end-three.vercel.app/auth/users?page=${page}&limit=10`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }

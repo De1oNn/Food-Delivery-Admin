@@ -24,10 +24,10 @@ export default function Order() {
       }
 
       const url = usernameFilter
-        ? `http://localhost:5000/order?username=${encodeURIComponent(
+        ? `https://food-delivery-back-end-three.vercel.app/order?username=${encodeURIComponent(
             usernameFilter
           )}`
-        : "http://localhost:5000/order";
+        : "https://food-delivery-back-end-three.vercel.app/order";
 
       const response = await fetch(url, {
         method: "GET",
@@ -63,7 +63,7 @@ export default function Order() {
       if (!token) throw new Error("Please login first");
 
       setError("");
-      const response = await fetch(`http://localhost:5000/order/${orderId}`, {
+      const response = await fetch(`https://food-delivery-back-end-three.vercel.app/order/${orderId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -82,21 +82,19 @@ export default function Order() {
         )
       );
     } catch (err) {
-      console.error("Update status error:", err);
       setError(
         `Failed to update status: ${
           err instanceof Error ? err.message : "Unknown error"
         }`
       );
     }
-    console.log("hello from update status");
   };
 
   const deleteOrder = async (orderId: string) => {
     try {
       const token = localStorage.getItem("token");
       setError("");
-      const response = await fetch(`http://localhost:5000/order/${orderId}`, {
+      const response = await fetch(`https://food-delivery-back-end-three.vercel.app/order/${orderId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -107,13 +105,11 @@ export default function Order() {
       await fetchOrders();
       alert("Order deleted successfully");
     } catch (err) {
-      console.error("Delete order error:", err);
       setError(
         `Failed to delete order: ${
           err instanceof Error ? err.message : "Unknown error"
         }`
       );
-      console.log("hello delete order");
     } finally {
     }
   };

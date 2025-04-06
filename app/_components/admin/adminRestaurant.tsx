@@ -30,7 +30,7 @@ const AdminRestaurant = () => {
     setRestaurantError(null);
     try {
       const res = await axios.get<{ restaurants: Restaurant[] }>(
-        "http://localhost:5000/restaurant",
+        "https://food-delivery-back-end-three.vercel.app/restaurant",
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -54,7 +54,7 @@ const AdminRestaurant = () => {
     }
     try {
       const response = await axios.post(
-        "http://localhost:5000/restaurant",
+        "https://food-delivery-back-end-three.vercel.app/restaurant",
         {
           location,
           picture,
