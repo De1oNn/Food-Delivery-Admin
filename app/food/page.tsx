@@ -102,18 +102,21 @@ export default function Food() {
     setMessage("");
     setError("");
     setIsLoading(true);
-
+  
     try {
       const requestBody = { categoryName: categoryFormData.categoryName };
-
-      const response = await fetch("https://lfood-delivery-back-end-three.vercel.app/food-category", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
-
+  
+      const response = await fetch(
+        "https://food-delivery-back-end-three.vercel.app/food-category", 
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        }
+      );
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         setMessage("Category created successfully!");
         setCategories((prev) => [...prev, data.category]);

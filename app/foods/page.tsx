@@ -14,41 +14,37 @@ export default function Foods() {
     const fetchData = async () => {
       try {
         setError("");
-
+    
         const categoryResponse = await fetch(
           "https://food-delivery-back-end-three.vercel.app/food-category",
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          }
+          { method: "GET", headers: { "Content-Type": "application/json" } }
         );
-        const categoryData = await categoryResponse.json();
+        const categoryText = await categoryResponse.text();
+        console.log("Categories raw response:", categoryText);
+        const categoryData = JSON.parse(categoryText);
         if (!categoryResponse.ok)
           throw new Error(categoryData.message || "Failed to fetch categories");
-
-        const foodResponse = await fetch("https://food-delivery-back-end-three.vercel.app/food", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        const foodData = await foodResponse.json();
+    
+        const foodResponse = await fetch(
+          "https://food-delivery-back-end-three.vercel.app/food",
+          { method: "GET", headers: { "Content-Type": "application/json" } }
+        );
+        const foodText = await foodResponse.text();
+        console.log("Foods raw response:", foodText);
+        const foodData = JSON.parse(foodText);
         if (!foodResponse.ok)
           throw new Error(foodData.message || "Failed to fetch foods");
-
+    
         const validFoods = (foodData.foods || []).filter(
           (food: FoodItem, index: number) => {
             if (!food.category) {
-              console.warn(
-                `Food ${index} (${food.foodName}) has null category`
-              );
+              console.warn(`Food ${index} (${food.foodName}) has null category`);
               return true;
             }
-            const categoryExists = (categoryData.categories || []).some(
-              (cat: CategoryItem) => cat._id === food.category?._id
-            );
             return true;
           }
         );
-
+    
         setCategories(categoryData.categories || []);
         setFoods(validFoods);
       } catch (err) {
@@ -78,7 +74,7 @@ export default function Foods() {
   
     try {
       const response = await fetch(
-        `https://food-delivery-back-end-three.vercel.app/food/${foodId}`,
+        `https://food-delivery-back-end-three.vercel.app/${foodId}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
