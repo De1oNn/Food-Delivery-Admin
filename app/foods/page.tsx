@@ -104,6 +104,50 @@ export default function Foods() {
       );
     }
   };
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (!confirm("Are you sure you want to delete this category and all its foods?")) return;
+
+    try {
+        console.log(`Deleting category with ID: ${categoryId}`); // Debug log
+        const response = await fetch(
+            `https://food-delivery-back-end-three.vercel.app/food-category/${categoryId}`,
+            {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+            }
+        );
+
+        const text = await response.text();
+        console.log("Raw category delete response:", text);
+
+        let data;
+        try {
+            data = text ? JSON.parse(text) : {};
+        } catch (jsonError) {
+            console.error("JSON parse error:", jsonError);
+            throw new Error(`Invalid JSON response: ${text}`);
+        }
+
+        if (!response.ok) {
+            console.log("Response not OK:", response.status, data);
+            throw new Error(data.message || `Failed to delete category (Status: ${response.status})`);
+        }
+
+        setCategories((prevCategories) => 
+            prevCategories.filter((cat) => cat._id !== categoryId)
+        );
+        setFoods((prevFoods) => 
+            prevFoods.filter((food) => food.category?._id !== categoryId)
+        );
+        
+        alert("Category deleted successfully!");
+    } catch (err) {
+        console.error("Delete category error:", err);
+        setError(
+            `Delete category error: ${err instanceof Error ? err.message : "Unknown"}`
+        );
+    }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 p-6">
@@ -148,6 +192,24 @@ export default function Foods() {
                 <h2 className="text-2xl font-semibold text-teal-400 mb-6">
                   {category.categoryName}
                 </h2>
+                <button
+                    onClick={() => handleDeleteCategory(category._id)}
+                    className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-all duration-300"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
                 {groupedFoods[category._id]?.length > 0 ? (
                   <div className="flex flex-wrap gap-6">
                     {groupedFoods[category._id].map((food) => (
