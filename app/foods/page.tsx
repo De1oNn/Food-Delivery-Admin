@@ -26,10 +26,20 @@ export default function Foods() {
         if (!categoryResponse.ok)
           throw new Error(categoryData.message || "Failed to fetch categories");
 
+<<<<<<< HEAD
         const foodResponse = await fetch("https://food-delivery-back-end-three.vercel.app/food", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
+=======
+        const foodResponse = await fetch(
+          "https://food-delivery-back-end-three.vercel.app/food",
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+>>>>>>> 8507a1fd3a2e0c822a02f4a50d2a50c02e95ea54
         const foodData = await foodResponse.json();
         if (!foodResponse.ok)
           throw new Error(foodData.message || "Failed to fetch foods");

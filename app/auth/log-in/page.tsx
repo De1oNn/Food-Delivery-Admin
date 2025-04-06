@@ -52,11 +52,22 @@ export default function Login() {
     }
 
     try {
+<<<<<<< HEAD
       const response = await fetch("https://food-delivery-back-end-three.vercel.app/auth/log-in", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+=======
+      const response = await fetch(
+        "https://food-delivery-back-end-three.vercel.app/auth/log-in",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+>>>>>>> 8507a1fd3a2e0c822a02f4a50d2a50c02e95ea54
 
       const data = await response.json();
 
