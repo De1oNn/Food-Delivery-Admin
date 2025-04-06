@@ -63,7 +63,6 @@ export default function Order() {
       if (!token) throw new Error("Please login first");
 
       setError("");
-<<<<<<< HEAD
       const response = await fetch(`https://food-delivery-back-end-three.vercel.app/order/${orderId}`, {
         method: "PATCH",
         headers: {
@@ -72,19 +71,6 @@ export default function Order() {
         },
         body: JSON.stringify({ status: newStatus }),
       });
-=======
-      const response = await fetch(
-        `https://food-delivery-back-end-three.vercel.app/order/${orderId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
->>>>>>> 8507a1fd3a2e0c822a02f4a50d2a50c02e95ea54
 
       const result = await response.json();
 
@@ -108,7 +94,6 @@ export default function Order() {
     try {
       const token = localStorage.getItem("token");
       setError("");
-<<<<<<< HEAD
       const response = await fetch(`https://food-delivery-back-end-three.vercel.app/order/${orderId}`, {
         method: "DELETE",
         headers: {
@@ -116,18 +101,6 @@ export default function Order() {
           Authorization: `Bearer ${token}`,
         },
       });
-=======
-      const response = await fetch(
-        `https://food-delivery-back-end-three.vercel.app/order/${orderId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
->>>>>>> 8507a1fd3a2e0c822a02f4a50d2a50c02e95ea54
       const result = await response.json();
       await fetchOrders();
       alert("Order deleted successfully");

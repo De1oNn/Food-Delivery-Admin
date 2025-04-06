@@ -95,7 +95,6 @@ export default function Profile() {
         },
       });
 
-<<<<<<< HEAD
       const response = await fetch("https://food-delivery-back-end-three.vercel.app/auth/update-user", {
         method: "PUT",
         headers: {
@@ -108,23 +107,6 @@ export default function Profile() {
           phoneNumber: formData.phoneNumber,
         }),
       });
-=======
-      const response = await fetch(
-        "https://food-delivery-back-end-three.vercel.app/auth/update-user",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            email: formData.email,
-            name: formData.name,
-            phoneNumber: formData.phoneNumber,
-          }),
-        }
-      );
->>>>>>> 8507a1fd3a2e0c822a02f4a50d2a50c02e95ea54
 
       const data = await response.json();
       console.log("Response from server:", { status: response.status, data });
